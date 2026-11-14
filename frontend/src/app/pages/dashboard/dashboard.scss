@@ -47,6 +47,14 @@
   }
 }
 
+.dues-stats {
+  grid-template-columns: repeat(2, 1fr);
+  margin-top: 6px;
+}
+a.stat:hover .value {
+  text-decoration: underline;
+}
+
 .dot {
   display: inline-block;
   width: 6px;
@@ -223,6 +231,10 @@
     .value {
       font-size: 16px;
     }
+  }
+  .dues-stats {
+    grid-template-columns: repeat(2, 1fr);
+    margin-top: 10px;
   }
   .stat.hero {
     grid-column: auto;

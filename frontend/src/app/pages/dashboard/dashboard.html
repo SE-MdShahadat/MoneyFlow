@@ -34,6 +34,20 @@
     </div>
   </section>
 
+  <!-- Receivable / payable right now (not limited to the selected month) -->
+  @if (summary(); as s) {
+    <section class="stats dues-stats">
+      <a class="stat card" routerLink="/dues">
+        <span class="label"><span class="dot income-bg"></span>{{ 'sum.receivable' | t }}</span>
+        <span class="value income">{{ s.receivable | money }}</span>
+      </a>
+      <a class="stat card" routerLink="/dues">
+        <span class="label"><span class="dot expense-bg"></span>{{ 'sum.payable' | t }}</span>
+        <span class="value expense">{{ s.payable | money }}</span>
+      </a>
+    </section>
+  }
+
   <!-- Accounts -->
   <section class="section">
     <div class="card-head">
