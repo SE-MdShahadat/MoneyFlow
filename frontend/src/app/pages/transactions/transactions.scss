@@ -56,6 +56,24 @@
   padding-top: 4px;
 }
 
+.day-head {
+  align-items: center;
+}
+.day-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.day-delete {
+  width: 32px;
+  height: 32px;
+  margin-right: -6px;
+}
+.day-delete:hover:not(:disabled) {
+  background: var(--expense-soft);
+  color: var(--expense);
+}
+
 .more {
   margin-top: 12px;
 }

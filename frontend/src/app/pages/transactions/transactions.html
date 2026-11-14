@@ -57,7 +57,15 @@
   @for (day of days(); track day.date) {
     <div class="day-head">
       <span>{{ day.date | bdate: 'long' }}</span>
-      <span [class.income]="day.net > 0" [class.expense]="day.net < 0">{{ day.net | money: true }}</span>
+      <span class="day-right">
+        <span [class.income]="day.net > 0" [class.expense]="day.net < 0">{{ day.net | money: true }}</span>
+        @if (canDeleteDay(day.items)) {
+          <button type="button" class="icon-btn day-delete" (click)="deleteDay(day)" [disabled]="deleting() !== null"
+                  [attr.aria-label]="'tx.deleteDay' | t" [title]="'tx.deleteDay' | t">
+            <app-icon name="trash" [size]="16" />
+          </button>
+        }
+      </span>
     </div>
     <div class="list">
       @for (tx of day.items; track tx.id) {

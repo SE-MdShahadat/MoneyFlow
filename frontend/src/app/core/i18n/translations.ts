@@ -100,6 +100,9 @@ const en: Dict = {
   'tx.count': '{n} entries',
   'tx.by': 'by {name}',
   'tx.confirmDelete': 'Delete this entry? This cannot be undone.',
+  'tx.deleteDay': 'Delete all entries of this day',
+  'tx.confirmDeleteDay': 'Delete {n} entries of {date}? This cannot be undone.',
+  'tx.othersKept': '{n} entries added by other members will be kept.',
   'tx.readOnly': 'Only the person who added this entry or an admin can change it.',
 
   'acc.add': 'Add account',
@@ -257,6 +260,9 @@ const bn: Dict = {
   'tx.count': '{n}টি এন্ট্রি',
   'tx.by': '{name} যোগ করেছেন',
   'tx.confirmDelete': 'এই এন্ট্রি মুছে ফেলবেন? এটি আর ফেরত আনা যাবে না।',
+  'tx.deleteDay': 'এই দিনের সব এন্ট্রি মুছুন',
+  'tx.confirmDeleteDay': '{date} তারিখের {n}টি এন্ট্রি মুছে ফেলবেন? এটি আর ফেরত আনা যাবে না।',
+  'tx.othersKept': 'অন্য সদস্যদের যোগ করা {n}টি এন্ট্রি থেকে যাবে।',
   'tx.readOnly': 'যিনি এন্ট্রি করেছেন তিনি বা অ্যাডমিনই শুধু এটি পরিবর্তন করতে পারবেন।',
 
   'acc.add': 'অ্যাকাউন্ট যোগ করুন',

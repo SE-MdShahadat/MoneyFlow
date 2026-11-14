@@ -181,6 +181,16 @@ export class ApiService {
     return from(changedOne(db().from('transactions').delete().eq('id', id).select('id')));
   }
 
+  /**
+   * Deletes several entries at once (e.g. one day's list). Returns how many were really deleted:
+   * rows a member may not delete (someone else's) are silently skipped by Row Level Security.
+   */
+  deleteTransactions(ids: number[]): Observable<number> {
+    return from(
+      unwrap(db().from('transactions').delete().in('id', ids).select('id')).then((rows) => rows?.length ?? 0),
+    );
+  }
+
   // ---------- Dashboard ----------
   dashboard(year: number, month: number): Observable<Dashboard> {
     return from(

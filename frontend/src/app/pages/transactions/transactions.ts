@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { ApiService } from '../../core/api.service';
+import { AuthService } from '../../core/auth.service';
 import { monthRange } from '../../core/config';
 import { I18N_PIPES, I18nService } from '../../core/i18n/i18n.service';
 import { Account, Period, Transaction, TransactionQuery, TransactionType, User } from '../../core/models';
@@ -18,6 +19,7 @@ const PAGE_SIZE = 50;
 })
 export class TransactionsPage {
   private readonly api = inject(ApiService);
+  private readonly auth = inject(AuthService);
   protected readonly i18n = inject(I18nService);
 
   // Filters
@@ -37,6 +39,8 @@ export class TransactionsPage {
   protected readonly totalExpense = signal(0);
   protected readonly loading = signal(false);
   protected readonly error = signal('');
+  /** Date whose entries are being deleted right now. */
+  protected readonly deleting = signal<string | null>(null);
   private page = 1;
 
   protected readonly hasMore = computed(() => this.items().length < this.total());
@@ -108,6 +112,36 @@ export class TransactionsPage {
         this.loading.set(false);
       },
     });
+  }
+
+  /** Deletes every entry listed under one day (respecting the current filters). */
+  protected deleteDay(day: { date: string; items: Transaction[] }): void {
+    if (this.deleting()) return;
+    const mine = this.auth.isAdmin() ? day.items : day.items.filter((t) => t.createdById === this.auth.user()?.id);
+    if (!mine.length) return this.error.set(this.i18n.t('err.FORBIDDEN'));
+
+    const question = this.i18n.t('tx.confirmDeleteDay', { date: this.i18n.date(day.date, 'long'), n: mine.length });
+    const skipped = day.items.length - mine.length;
+    if (!confirm(skipped ? `${question}\n\n${this.i18n.t('tx.othersKept', { n: skipped })}` : question)) return;
+
+    this.deleting.set(day.date);
+    this.error.set('');
+    this.api.deleteTransactions(mine.map((t) => t.id)).subscribe({
+      next: () => {
+        this.deleting.set(null);
+        this.load(this.query(), true);
+      },
+      error: (e) => {
+        this.deleting.set(null);
+        this.error.set(this.i18n.error(e));
+      },
+    });
+  }
+
+  /** Whether the current user may delete at least one entry of the day. */
+  protected canDeleteDay(items: Transaction[]): boolean {
+    const me = this.auth.user()?.id;
+    return this.auth.isAdmin() || items.some((t) => t.createdById === me);
   }
 
   protected typeLabel(t: TransactionType | ''): string {
