@@ -5,7 +5,7 @@
   <h1>{{ (id() ? 'tx.edit' : 'tx.new') | t }}</h1>
 </div>
 
-<div class="form-wrap">
+<div class="form-wrap" [class.wide]="!id() && mode() === 'batch'">
   @if (!ready()) {
     <p class="empty">{{ 'common.loading' | t }}</p>
   } @else if (!accounts().length && !error()) {
@@ -14,6 +14,99 @@
       <a class="btn btn-primary" routerLink="/accounts">{{ 'nav.accounts' | t }}</a>
     </div>
   } @else {
+    @if (!id()) {
+      <div class="seg mode-seg">
+        <button type="button" [class.on]="mode() === 'batch'" (click)="setMode('batch')">{{ 'tx.modeBatch' | t }}</button>
+        <button type="button" [class.on]="mode() === 'single'" (click)="setMode('single')">{{ 'tx.modeSingle' | t }}</button>
+      </div>
+    }
+
+    @if (!id() && mode() === 'batch') {
+    <!-- One date first, then any number of entries for that date, saved together -->
+    <form class="card batch" (ngSubmit)="saveBatch()">
+      <fieldset [disabled]="busy()">
+        <div class="field batch-date">
+          <label for="batchDate">{{ 'field.date' | t }}</label>
+          <input id="batchDate" name="batchDate" type="date" [(ngModel)]="batchDate" required />
+        </div>
+
+        @for (r of rows(); track r.key; let i = $index) {
+          <div class="batch-row">
+            <div class="batch-row-head">
+              <span class="row-no">{{ i + 1 | num }}</span>
+              <div class="seg seg-sm">
+                @for (t of types; track t) {
+                  <button type="button" [class]="t.toLowerCase()" [class.on]="r.type === t" (click)="setRowType(r, t)">
+                    {{ 'type.' + t | t }}
+                  </button>
+                }
+              </div>
+              <button type="button" class="icon-btn" (click)="removeRow(r.key)" [disabled]="rows().length === 1"
+                      [attr.aria-label]="'tx.removeRow' | t" [title]="'tx.removeRow' | t">
+                <app-icon name="x" [size]="14" />
+              </button>
+            </div>
+
+            <div class="batch-grid">
+              <input class="b-amount" [class]="r.type.toLowerCase()" type="number" inputmode="decimal" min="0" step="0.01"
+                     [placeholder]="'field.amount' | t" [attr.aria-label]="'field.amount' | t"
+                     [name]="'amt-' + r.key" [(ngModel)]="r.amount" />
+
+              @if (r.type === 'Transfer') {
+                <select [name]="'to-' + r.key" [(ngModel)]="r.toAccountId" [attr.aria-label]="'field.toAccount' | t">
+                  <option [ngValue]="null">→ {{ 'field.toAccount' | t }}</option>
+                  @for (a of accounts(); track a.id) {
+                    <option [ngValue]="a.id" [disabled]="a.id === r.accountId">→ {{ a.name }}</option>
+                  }
+                </select>
+              } @else {
+                <select [name]="'cat-' + r.key" [(ngModel)]="r.categoryId" [attr.aria-label]="'field.category' | t">
+                  <option [ngValue]="null">— {{ 'field.category' | t }} —</option>
+                  @for (c of categoriesFor(r.type); track c.id) {
+                    <option [ngValue]="c.id">{{ c.icon }} {{ i18n.catName(c) }}</option>
+                  }
+                </select>
+              }
+
+              <select [name]="'acc-' + r.key" [(ngModel)]="r.accountId"
+                      [attr.aria-label]="(r.type === 'Transfer' ? 'field.fromAccount' : 'field.account') | t">
+                <option [ngValue]="null" disabled>— {{ 'field.account' | t }} —</option>
+                @for (a of accounts(); track a.id) {
+                  <option [ngValue]="a.id">{{ a.name }}</option>
+                }
+              </select>
+
+              <select [name]="'mem-' + r.key" [(ngModel)]="r.memberId" [attr.aria-label]="'field.member' | t">
+                <option [ngValue]="null">— {{ 'field.member' | t }} —</option>
+                @for (m of activeMembers(); track m.id) {
+                  <option [ngValue]="m.id">{{ m.name }}</option>
+                }
+              </select>
+
+              <input class="b-note" type="text" maxlength="500" [placeholder]="'field.note' | t"
+                     [attr.aria-label]="'field.note' | t" [name]="'note-' + r.key" [(ngModel)]="r.note" />
+            </div>
+          </div>
+        }
+
+        <button type="button" class="btn btn-ghost btn-block add-row" (click)="addRow()">
+          <app-icon name="plus" [size]="14" /> {{ 'tx.addRow' | t }}
+        </button>
+
+        @let s = batchTotals();
+        <p class="multi-summary">
+          {{ 'tx.batchSummary' | t: { n: s.n, exp: i18n.money(s.expense), inc: i18n.money(s.income) } }}
+        </p>
+      </fieldset>
+
+      @if (error()) {
+        <div class="alert alert-error" role="alert">{{ error() }}</div>
+      }
+      <div class="actions">
+        <button type="submit" class="btn btn-primary" [disabled]="busy()">{{ 'action.save' | t }}</button>
+      </div>
+    </form>
+    } @else {
     <form class="card" (ngSubmit)="save()">
       @if (!canModify()) {
         <div class="alert alert-info">{{ 'tx.readOnly' | t }}</div>
@@ -177,5 +270,6 @@
         </div>
       }
     </form>
+    }
   }
 </div>

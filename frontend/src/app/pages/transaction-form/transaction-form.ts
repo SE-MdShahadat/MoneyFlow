@@ -14,6 +14,18 @@ const LAST_ACCOUNT_KEY = 'mf.lastAccount';
 /** Most entries one multi-day save may create. */
 const MAX_DAYS = 62;
 
+/** One line of the "many entries on one date" form. */
+interface BatchRow {
+  key: number;
+  type: TransactionType;
+  amount: number | null;
+  accountId: number | null;
+  toAccountId: number | null;
+  categoryId: number | null;
+  memberId: string | null;
+  note: string;
+}
+
 @Component({
   selector: 'app-transaction-form',
   imports: [FormsModule, RouterLink, Icon, ...I18N_PIPES],
@@ -51,6 +63,12 @@ export class TransactionFormPage implements OnInit {
     memberId: null as string | null,
     note: '',
   };
+
+  /** New entries: 'batch' = one date with many rows (default); 'single' = the classic form with multi-day. */
+  protected readonly mode = signal<'batch' | 'single'>('batch');
+  protected batchDate = todayIso();
+  protected readonly rows = signal<BatchRow[]>([]);
+  private nextRowKey = 1;
 
   // Multi-day: the same entry saved once per day from form.date to toDate (new entries only).
   protected readonly multiDay = signal(false);
@@ -95,7 +113,10 @@ export class TransactionFormPage implements OnInit {
     this.id.set(id);
 
     const typeParam = this.route.snapshot.queryParamMap.get('type') as TransactionType | null;
-    if (typeParam && this.types.includes(typeParam)) this.type.set(typeParam);
+    if (typeParam && this.types.includes(typeParam)) {
+      this.type.set(typeParam);
+      this.mode.set('single');
+    }
 
     const tx$: Observable<Transaction | null> = id ? this.api.transaction(id) : of(null);
     forkJoin([this.api.accounts(), this.api.categories(), this.api.users(), tx$]).subscribe({
@@ -133,6 +154,101 @@ export class TransactionFormPage implements OnInit {
     const last = Number(storageGet(LAST_ACCOUNT_KEY));
     this.form.accountId = active.find((a) => a.id === last)?.id ?? active[0]?.id ?? null;
     this.form.memberId = this.auth.user()?.id ?? null;
+    this.rows.set([this.newRow()]);
+  }
+
+  // ---------- Batch mode: one date, many entries, one Save ----------
+
+  private newRow(copyFrom?: BatchRow): BatchRow {
+    return {
+      key: this.nextRowKey++,
+      type: copyFrom?.type ?? 'Expense',
+      amount: null,
+      accountId: copyFrom?.accountId ?? this.form.accountId,
+      toAccountId: null,
+      categoryId: null,
+      memberId: copyFrom ? copyFrom.memberId : this.form.memberId,
+      note: '',
+    };
+  }
+
+  /** New rows reuse the previous row's type, account and member, which usually stay the same. */
+  protected addRow(): void {
+    const rows = this.rows();
+    this.rows.set([...rows, this.newRow(rows[rows.length - 1])]);
+  }
+
+  protected removeRow(key: number): void {
+    if (this.rows().length > 1) this.rows.set(this.rows().filter((r) => r.key !== key));
+  }
+
+  protected setRowType(row: BatchRow, type: TransactionType): void {
+    if (row.type === type) return;
+    row.type = type;
+    row.categoryId = null;
+    row.toAccountId = null;
+  }
+
+  protected categoriesFor(type: TransactionType): Category[] {
+    const wanted = type === 'Income' ? 'Income' : 'Expense';
+    return this.allCategories().filter((c) => c.type === wanted && c.isActive);
+  }
+
+  private filledRows(): BatchRow[] {
+    return this.rows().filter((r) => (Number(r.amount) || 0) > 0);
+  }
+
+  protected batchTotals(): { n: number; expense: number; income: number } {
+    const rows = this.filledRows();
+    const sum = (t: TransactionType) => rows.filter((r) => r.type === t).reduce((s, r) => s + Number(r.amount), 0);
+    return { n: rows.length, expense: sum('Expense'), income: sum('Income') };
+  }
+
+  protected saveBatch(): void {
+    if (this.busy()) return;
+    const rows = this.rows();
+    if (!this.batchDate) return this.error.set(this.i18n.t('err.validation'));
+    if (!this.filledRows().length) return this.error.set(this.i18n.t('tx.batchEmpty'));
+
+    // Rows without an amount are ignored; rows with an amount must be complete.
+    for (const [i, r] of rows.entries()) {
+      if (!((Number(r.amount) || 0) > 0)) continue;
+      const problem = !r.accountId
+        ? 'err.ACCOUNT_REQUIRED'
+        : r.type === 'Transfer'
+          ? !r.toAccountId || r.toAccountId === r.accountId ? 'err.TO_ACCOUNT_INVALID' : null
+          : !r.categoryId ? 'err.CATEGORY_REQUIRED' : null;
+      if (problem) return this.error.set(`${this.i18n.t('tx.rowError', { n: i + 1 })}: ${this.i18n.t(problem)}`);
+    }
+
+    const bodies: TransactionSave[] = this.filledRows().map((r) => ({
+      type: r.type,
+      amount: Number(r.amount),
+      date: this.batchDate,
+      accountId: r.accountId!,
+      toAccountId: r.type === 'Transfer' ? r.toAccountId : null,
+      categoryId: r.type === 'Transfer' ? null : r.categoryId,
+      memberId: r.memberId,
+      note: r.note.trim() || null,
+    }));
+
+    this.busy.set(true);
+    this.error.set('');
+    this.api.createTransactions(bodies).subscribe({
+      next: () => {
+        storageSet(LAST_ACCOUNT_KEY, String(bodies[bodies.length - 1].accountId));
+        this.goBack();
+      },
+      error: (e) => {
+        this.busy.set(false);
+        this.error.set(this.i18n.error(e));
+      },
+    });
+  }
+
+  protected setMode(mode: 'batch' | 'single'): void {
+    this.mode.set(mode);
+    this.error.set('');
   }
 
   protected setMultiDay(on: boolean): void {

@@ -1,6 +1,9 @@
 .form-wrap {
   max-width: 640px;
 }
+.form-wrap.wide {
+  max-width: 920px;
+}
 
 fieldset {
   border: 0;
@@ -28,6 +31,100 @@ fieldset {
 
 .span-2 {
   grid-column: 1 / -1;
+}
+
+.mode-seg {
+  margin-bottom: 8px;
+}
+
+/* ---------- Batch: one date, many entries ---------- */
+.batch-date {
+  max-width: 220px;
+}
+.batch-row {
+  margin-bottom: 6px;
+  padding: 6px 7px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+.batch-row-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 5px;
+  .seg-sm {
+    flex: 1;
+    padding: 2px;
+    background: var(--surface);
+    button {
+      min-height: 22px;
+      font-size: 11px;
+    }
+  }
+}
+.row-no {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 700;
+}
+/* Phone: amount | category, account | member, note across. Laptop: all on one line. */
+.batch-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 4px;
+  input,
+  select {
+    width: 100%;
+    min-width: 0;
+    min-height: 28px;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: 12px;
+  }
+  input:focus,
+  select:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: -1px;
+  }
+  .b-amount {
+    font-weight: 700;
+  }
+  .b-amount.expense {
+    color: var(--expense);
+  }
+  .b-amount.income {
+    color: var(--income);
+  }
+  .b-amount.transfer {
+    color: var(--transfer);
+  }
+  .b-note {
+    grid-column: 1 / -1;
+  }
+}
+@media (min-width: 900px) {
+  .batch-grid {
+    grid-template-columns: 90px minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.4fr);
+    .b-note {
+      grid-column: auto;
+    }
+  }
+}
+.add-row {
+  border-style: dashed;
+  margin-bottom: 6px;
 }
 
 .multi-day {
