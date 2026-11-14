@@ -146,6 +146,8 @@ const en: Dict = {
   'dash.byMember': 'Expense by member',
   'dash.trend': 'Last 6 months',
   'dash.recent': 'Recent entries',
+  'dash.today': "Today's activity",
+  'dash.todayEmpty': 'No entries today.',
   'dash.seeAll': 'See all',
   'dash.notAssigned': 'Not assigned',
 
@@ -380,6 +382,8 @@ const bn: Dict = {
   'dash.byMember': 'সদস্য অনুযায়ী খরচ',
   'dash.trend': 'গত ৬ মাস',
   'dash.recent': 'সাম্প্রতিক লেনদেন',
+  'dash.today': 'আজকের লেনদেন',
+  'dash.todayEmpty': 'আজ কোনো এন্ট্রি নেই।',
   'dash.seeAll': 'সব দেখুন',
   'dash.notAssigned': 'নির্দিষ্ট নয়',
 

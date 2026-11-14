@@ -3,7 +3,8 @@ import { RouterLink } from '@angular/router';
 import { ApiService } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { I18N_PIPES, I18nService } from '../../core/i18n/i18n.service';
-import { ACCOUNT_ICONS, BalanceSummary, Dashboard, Period } from '../../core/models';
+import { todayIso } from '../../core/config';
+import { ACCOUNT_ICONS, BalanceSummary, Dashboard, Period, TransactionPage } from '../../core/models';
 import { MonthPicker, TxItem, currentPeriod } from '../../shared/ui';
 
 @Component({
@@ -23,6 +24,9 @@ export class DashboardPage {
   protected readonly error = signal('');
   /** Open receivable / payable totals (all time). */
   protected readonly summary = signal<BalanceSummary | null>(null);
+  /** Every entry dated today (independent of the selected month). */
+  protected readonly today = signal<TransactionPage | null>(null);
+  protected readonly todayDate = todayIso();
 
   protected readonly maxCategory = computed(() => Math.max(1, ...(this.data()?.expenseByCategory.map((c) => c.amount) ?? [])));
   protected readonly maxMember = computed(() => Math.max(1, ...(this.data()?.expenseByMember.map((m) => m.amount) ?? [])));
@@ -40,6 +44,10 @@ export class DashboardPage {
     this.api.balanceSummary().subscribe({
       next: (s) => this.summary.set(s),
       error: () => this.summary.set(null),
+    });
+    this.api.transactions({ from: this.todayDate, to: this.todayDate, page: 1, pageSize: 500 }).subscribe({
+      next: (p) => this.today.set(p),
+      error: () => this.today.set(null),
     });
 
     effect(() => {
