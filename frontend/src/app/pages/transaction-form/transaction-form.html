@@ -115,7 +115,7 @@
         <div class="actions">
           @if (id()) {
             <button type="button" class="btn btn-danger" (click)="remove()" [disabled]="busy()">
-              <app-icon name="trash" [size]="18" /> {{ 'action.delete' | t }}
+              <app-icon name="trash" [size]="14" /> {{ 'action.delete' | t }}
             </button>
           }
           <button type="submit" class="btn btn-primary" [disabled]="busy()">{{ 'action.save' | t }}</button>

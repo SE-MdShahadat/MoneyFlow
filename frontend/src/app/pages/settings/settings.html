@@ -34,16 +34,16 @@
     <div class="card-head"><h2>{{ 'set.manage' | t }}</h2></div>
     <div class="list">
       <a class="list-row" routerLink="/accounts">
-        <app-icon name="wallet" /><span class="grow title">{{ 'nav.accounts' | t }}</span><app-icon name="chevron-right" [size]="18" />
+        <app-icon name="wallet" /><span class="grow title">{{ 'nav.accounts' | t }}</span><app-icon name="chevron-right" [size]="14" />
       </a>
       <a class="list-row" routerLink="/dues">
-        <app-icon name="swap" /><span class="grow title">{{ 'nav.dues' | t }}</span><app-icon name="chevron-right" [size]="18" />
+        <app-icon name="swap" /><span class="grow title">{{ 'nav.dues' | t }}</span><app-icon name="chevron-right" [size]="14" />
       </a>
       <a class="list-row" routerLink="/categories">
-        <app-icon name="tag" /><span class="grow title">{{ 'nav.categories' | t }}</span><app-icon name="chevron-right" [size]="18" />
+        <app-icon name="tag" /><span class="grow title">{{ 'nav.categories' | t }}</span><app-icon name="chevron-right" [size]="14" />
       </a>
       <a class="list-row" routerLink="/members">
-        <app-icon name="users" /><span class="grow title">{{ 'nav.members' | t }}</span><app-icon name="chevron-right" [size]="18" />
+        <app-icon name="users" /><span class="grow title">{{ 'nav.members' | t }}</span><app-icon name="chevron-right" [size]="14" />
       </a>
     </div>
   </div>
@@ -72,6 +72,6 @@
   </div>
 
   <button type="button" class="btn btn-ghost btn-block logout" (click)="auth.logout()">
-    <app-icon name="logout" [size]="18" /> {{ 'action.logout' | t }}
+    <app-icon name="logout" [size]="14" /> {{ 'action.logout' | t }}
   </button>
 </div>

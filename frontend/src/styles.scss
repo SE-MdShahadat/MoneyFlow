@@ -16,9 +16,9 @@
   --expense-soft: #fee2e2;
   --transfer: #2563eb;
   --transfer-soft: #dbeafe;
-  --radius: 16px;
-  --radius-sm: 10px;
-  --shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 6px 18px rgba(15, 23, 42, 0.05);
+  --radius: 10px;
+  --radius-sm: 7px;
+  --shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 4px 12px rgba(15, 23, 42, 0.04);
   --font: 'Hind Siliguri', system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans Bengali', sans-serif;
   color-scheme: light;
 }
@@ -59,8 +59,8 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font);
-  font-size: 15px;
-  line-height: 1.45;
+  font-size: 13px;
+  line-height: 1.4;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
 }
@@ -72,11 +72,11 @@ h3 {
   line-height: 1.25;
 }
 h1 {
-  font-size: 22px;
+  font-size: 17px;
   font-weight: 700;
 }
 h2 {
-  font-size: 17px;
+  font-size: 14px;
   font-weight: 700;
 }
 
@@ -95,7 +95,7 @@ button {
   color: var(--muted);
 }
 .small {
-  font-size: 13px;
+  font-size: 11.5px;
 }
 .income {
   color: var(--income);
@@ -118,19 +118,19 @@ button {
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   font-weight: 700;
-  font-size: 18px;
+  font-size: 15px;
 }
 .brand-mark {
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
   background: var(--primary);
   color: var(--on-primary);
-  font-size: 20px;
+  font-size: 15px;
 }
 
 .sidebar {
@@ -144,7 +144,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
+  padding: calc(6px + env(safe-area-inset-top)) 12px 6px;
   background: color-mix(in srgb, var(--bg) 88%, transparent);
   backdrop-filter: blur(10px);
 }
@@ -152,20 +152,20 @@ button {
 .lang-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
+  gap: 5px;
+  padding: 3px 9px;
   border-radius: 99px;
   border: 1px solid var(--border);
   background: var(--surface);
-  font-size: 13px;
+  font-size: 11.5px;
   font-weight: 600;
 }
 
 .content {
   width: 100%;
-  max-width: 1180px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 4px 16px calc(100px + env(safe-area-inset-bottom));
+  padding: 2px 12px calc(76px + env(safe-area-inset-bottom));
 }
 
 .bottomnav {
@@ -185,9 +185,9 @@ button {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
-    padding: 8px 0 6px;
-    font-size: 11px;
+    gap: 1px;
+    padding: 5px 0 4px;
+    font-size: 10px;
     font-weight: 600;
     color: var(--muted);
   }
@@ -196,22 +196,22 @@ button {
   }
   a.fab {
     justify-self: center;
-    width: 58px;
-    height: 58px;
+    width: 44px;
+    height: 44px;
     padding: 0;
-    margin: -24px 0 8px;
+    margin: -16px 0 6px;
     justify-content: center;
     border-radius: 50%;
     background: var(--primary);
     color: var(--on-primary);
-    box-shadow: 0 8px 20px rgba(15, 118, 110, 0.35);
+    box-shadow: 0 6px 14px rgba(15, 118, 110, 0.35);
   }
 }
 
 @media (min-width: 900px) {
   .shell {
     display: grid;
-    grid-template-columns: 252px 1fr;
+    grid-template-columns: 196px 1fr;
   }
   .topbar,
   .bottomnav {
@@ -223,24 +223,24 @@ button {
     height: 100dvh;
     display: flex;
     flex-direction: column;
-    gap: 18px;
-    padding: 22px 14px 16px;
+    gap: 12px;
+    padding: 14px 10px 10px;
     background: var(--surface);
     border-right: 1px solid var(--border);
   }
   .sidebar .brand {
-    padding: 0 8px;
+    padding: 0 6px;
   }
   .side-nav {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 1px;
     a {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 10px 12px;
-      border-radius: 10px;
+      gap: 9px;
+      padding: 6px 9px;
+      border-radius: 7px;
       font-weight: 600;
       color: var(--muted);
     }
@@ -257,13 +257,13 @@ button {
     margin-top: auto;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
   }
   .side-user {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 8px 0;
+    gap: 8px;
+    padding: 8px 4px 0;
     border-top: 1px solid var(--border);
   }
   .side-user-name {
@@ -281,7 +281,7 @@ button {
     }
   }
   .content {
-    padding: 28px 32px 48px;
+    padding: 14px 20px 28px;
   }
 }
 
@@ -289,11 +289,12 @@ button {
   display: grid;
   place-items: center;
   flex: none;
-  width: 38px;
-  height: 38px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: var(--primary-soft);
   color: var(--primary);
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -302,8 +303,8 @@ button {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 12px;
-  margin: 6px 0 16px;
+  gap: 8px;
+  margin: 2px 0 10px;
 }
 .page-head h1 {
   flex: 1;
@@ -314,18 +315,18 @@ button {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 16px;
+  padding: 10px 12px;
   box-shadow: var(--shadow);
 }
 .card-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 8px;
+  margin-bottom: 6px;
 }
 .card-head a {
-  font-size: 13px;
+  font-size: 11.5px;
   font-weight: 600;
   color: var(--primary);
 }
@@ -333,20 +334,20 @@ button {
 .stack {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
 }
 
 .empty {
   text-align: center;
   color: var(--muted);
-  padding: 28px 12px;
+  padding: 16px 10px;
 }
 
 .alert {
-  padding: 10px 12px;
+  padding: 7px 10px;
   border-radius: var(--radius-sm);
-  font-size: 14px;
-  margin-bottom: 12px;
+  font-size: 12px;
+  margin-bottom: 8px;
 }
 .alert-error {
   background: var(--expense-soft);
@@ -363,9 +364,9 @@ button {
 
 .badge {
   display: inline-block;
-  padding: 1px 8px;
+  padding: 0 6px;
   border-radius: 99px;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   background: var(--surface-2);
   color: var(--muted);
@@ -376,10 +377,10 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  min-height: 44px;
-  padding: 0 18px;
-  border-radius: 12px;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 8px;
   border: 1px solid transparent;
   font-weight: 600;
   white-space: nowrap;
@@ -411,17 +412,17 @@ button {
   width: 100%;
 }
 .btn-sm {
-  min-height: 36px;
-  padding: 0 12px;
-  font-size: 14px;
+  min-height: 26px;
+  padding: 0 9px;
+  font-size: 12px;
 }
 
 .icon-btn {
   display: inline-grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
   border: 0;
   background: transparent;
   color: var(--muted);
@@ -433,8 +434,8 @@ button {
 
 .actions {
   display: flex;
-  gap: 10px;
-  margin-top: 8px;
+  gap: 8px;
+  margin-top: 6px;
 }
 .actions .btn {
   flex: 1;
@@ -444,17 +445,17 @@ button {
 .field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-bottom: 14px;
+  gap: 3px;
+  margin-bottom: 9px;
 }
 .field > label,
 .field-label {
-  font-size: 13px;
+  font-size: 11.5px;
   font-weight: 600;
   color: var(--muted);
 }
 .field .hint {
-  font-size: 12px;
+  font-size: 10.5px;
   color: var(--muted);
 }
 .input,
@@ -462,17 +463,17 @@ button {
 .field select,
 .field textarea {
   width: 100%;
-  min-height: 46px;
-  padding: 10px 12px;
+  min-height: 32px;
+  padding: 5px 9px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--text);
   font: inherit;
-  font-size: 16px; /* 16px stops iOS from zooming into inputs */
+  font-size: 13px;
 }
 .field textarea {
-  min-height: 72px;
+  min-height: 52px;
   resize: vertical;
 }
 .input:focus,
@@ -484,9 +485,9 @@ button {
   border-color: transparent;
 }
 .field input[type='color'] {
-  width: 64px;
-  height: 46px;
-  padding: 4px;
+  width: 48px;
+  height: 32px;
+  padding: 3px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--surface);
@@ -494,42 +495,42 @@ button {
 .check {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 14px;
+  gap: 8px;
+  margin-bottom: 9px;
   font-weight: 600;
 }
 .check input {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   accent-color: var(--primary);
 }
 .row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 8px;
 }
 
 .amount-input {
-  font-size: 30px !important;
+  font-size: 22px !important;
   font-weight: 700;
   text-align: center;
-  min-height: 64px !important;
+  min-height: 44px !important;
 }
 
 /* Segmented control */
 .seg {
   display: flex;
-  gap: 4px;
-  padding: 4px;
-  border-radius: 12px;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 8px;
   background: var(--surface-2);
 }
 .seg button {
   flex: 1;
-  min-height: 38px;
-  padding: 0 10px;
+  min-height: 26px;
+  padding: 0 8px;
   border: 0;
-  border-radius: 9px;
+  border-radius: 6px;
   background: transparent;
   font-weight: 600;
   color: var(--muted);
@@ -553,24 +554,24 @@ button {
 /* Category picker */
 .chip-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(86px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+  gap: 5px;
 }
 .chip {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 10px 4px;
+  gap: 2px;
+  padding: 6px 2px;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 8px;
   background: var(--surface);
-  font-size: 12px;
-  line-height: 1.2;
+  font-size: 10.5px;
+  line-height: 1.15;
   text-align: center;
 }
 .chip .emoji {
-  font-size: 22px;
+  font-size: 16px;
 }
 .chip.on {
   border-color: var(--primary);
@@ -582,14 +583,14 @@ button {
 .month-picker {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  padding: 2px;
-  border-radius: 12px;
+  gap: 1px;
+  padding: 1px;
+  border-radius: 8px;
   background: var(--surface);
   border: 1px solid var(--border);
 }
 .month-label {
-  min-width: 130px;
+  min-width: 100px;
   text-align: center;
   font-weight: 600;
 }
@@ -606,8 +607,8 @@ button {
 .tx-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 11px 2px;
+  gap: 8px;
+  padding: 6px 2px;
 }
 .tx-item:hover .tx-title {
   color: var(--primary);
@@ -616,10 +617,10 @@ button {
   display: grid;
   place-items: center;
   flex: none;
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  font-size: 20px;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  font-size: 14px;
 }
 .tx-main {
   flex: 1;
@@ -631,7 +632,7 @@ button {
   font-weight: 600;
 }
 .tx-sub {
-  font-size: 13px;
+  font-size: 11px;
   color: var(--muted);
   white-space: nowrap;
   overflow: hidden;
@@ -645,8 +646,8 @@ button {
 .list-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 2px;
+  gap: 8px;
+  padding: 7px 2px;
 }
 .list-row .grow {
   flex: 1;
@@ -690,11 +691,11 @@ button {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 2px;
+  gap: 1px;
   text-align: left;
   cursor: pointer;
   strong {
-    font-size: 20px;
+    font-size: 15px;
   }
 }
 .due-total.on {
@@ -711,20 +712,20 @@ button {
 }
 .swatch {
   flex: none;
-  width: 14px;
-  height: 14px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
 }
 .big-number {
-  font-size: 26px;
+  font-size: 19px;
   font-weight: 700;
 }
 
 .day-head {
   display: flex;
   justify-content: space-between;
-  padding: 14px 2px 4px;
-  font-size: 13px;
+  padding: 8px 2px 2px;
+  font-size: 11.5px;
   font-weight: 600;
   color: var(--muted);
 }
@@ -745,24 +746,24 @@ button {
   max-height: 92dvh;
   overflow: auto;
   background: var(--surface);
-  border-radius: 20px 20px 0 0;
-  padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+  border-radius: 14px 14px 0 0;
+  padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
   animation: rise 0.2s ease-out;
 }
 .modal-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 @media (min-width: 640px) {
   .modal-backdrop {
     align-items: center;
-    padding: 24px;
+    padding: 20px;
   }
   .modal {
-    max-width: 520px;
-    border-radius: 20px;
+    max-width: 440px;
+    border-radius: 14px;
   }
 }
 @keyframes fade {

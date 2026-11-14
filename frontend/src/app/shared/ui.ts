@@ -46,7 +46,7 @@ const ICONS: Record<string, string> = {
 export class Icon {
   private readonly sanitizer = inject(DomSanitizer);
   readonly name = input.required<string>();
-  readonly size = input(22);
+  readonly size = input(17);
   protected readonly svg = computed(() => this.sanitizer.bypassSecurityTrustHtml(ICONS[this.name()] ?? ''));
 }
 

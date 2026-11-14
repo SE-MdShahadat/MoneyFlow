@@ -1,14 +1,14 @@
 .filters {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 12px;
+  gap: 6px;
+  padding: 7px;
 }
 
 .filter-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 5px;
 }
 
 .search {
@@ -17,35 +17,42 @@
   display: block;
   app-icon {
     position: absolute;
-    left: 12px;
+    left: 9px;
     top: 50%;
     transform: translateY(-50%);
     color: var(--muted);
   }
   .input {
-    padding-left: 38px;
+    padding-left: 28px;
   }
 }
 
 .input {
-  min-height: 42px !important;
-  font-size: 15px !important;
+  min-height: 28px !important;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px !important;
+  width: 100%;
 }
 
 .totals {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin: 12px 0;
+  gap: 6px;
+  margin: 8px 0;
 }
 .tot {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0;
   min-width: 0;
-  padding: 10px 12px;
+  padding: 6px 9px;
   strong {
-    font-size: 15px;
+    font-size: 13px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -69,12 +76,12 @@ a.tot:hover strong {
   color: var(--expense);
 }
 .hint-line {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--muted);
 }
 
 .list-card {
-  padding-top: 4px;
+  padding-top: 2px;
 }
 
 .day-head {
@@ -83,12 +90,12 @@ a.tot:hover strong {
 .day-right {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
 }
 .day-delete {
-  width: 32px;
-  height: 32px;
-  margin-right: -6px;
+  width: 24px;
+  height: 24px;
+  margin-right: -4px;
 }
 .day-delete:hover:not(:disabled) {
   background: var(--expense-soft);
@@ -96,11 +103,11 @@ a.tot:hover strong {
 }
 
 .more {
-  margin-top: 12px;
+  margin-top: 8px;
 }
 
 .empty .btn {
-  margin-top: 8px;
+  margin-top: 6px;
 }
 
 @media (min-width: 900px) {
@@ -110,7 +117,7 @@ a.tot:hover strong {
   }
   .type-seg {
     flex: none;
-    width: 380px;
+    width: 300px;
   }
   .filter-row {
     flex: 1;
@@ -120,17 +127,17 @@ a.tot:hover strong {
     grid-column: auto;
   }
   .totals {
-    gap: 16px;
-    margin: 16px 0;
+    gap: 8px;
+    margin: 8px 0;
   }
   .totals-4 {
     grid-template-columns: repeat(4, 1fr);
     margin-top: 0;
   }
   .tot {
-    padding: 14px 18px;
+    padding: 8px 12px;
     strong {
-      font-size: 20px;
+      font-size: 15px;
     }
   }
 }

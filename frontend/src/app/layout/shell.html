@@ -7,13 +7,13 @@
     </a>
 
     <a class="btn btn-primary btn-block side-add" routerLink="/transactions/new">
-      <app-icon name="plus" [size]="20" /> {{ 'tx.new' | t }}
+      <app-icon name="plus" [size]="16" /> {{ 'tx.new' | t }}
     </a>
 
     <nav class="side-nav">
       @for (item of sideNav; track item.path) {
         <a [routerLink]="item.path" routerLinkActive="active">
-          <app-icon [name]="item.icon" [size]="20" />
+          <app-icon [name]="item.icon" [size]="16" />
           <span>{{ item.label | t }}</span>
         </a>
       }
@@ -21,7 +21,7 @@
 
     <div class="side-foot">
       <button type="button" class="btn btn-ghost btn-block" (click)="i18n.toggle()">
-        <app-icon name="globe" [size]="18" /> {{ otherLang() }}
+        <app-icon name="globe" [size]="15" /> {{ otherLang() }}
       </button>
       <div class="side-user">
         <span class="avatar">{{ initial() }}</span>
@@ -30,7 +30,7 @@
           <small>{{ 'role.' + auth.user()?.role | t }}</small>
         </span>
         <button type="button" class="icon-btn" (click)="auth.logout()" [attr.aria-label]="'action.logout' | t" [title]="'action.logout' | t">
-          <app-icon name="logout" [size]="20" />
+          <app-icon name="logout" [size]="16" />
         </button>
       </div>
     </div>
@@ -44,7 +44,7 @@
         <span>{{ 'app.name' | t }}</span>
       </a>
       <button type="button" class="lang-pill" (click)="i18n.toggle()">
-        <app-icon name="globe" [size]="16" /> {{ otherLang() }}
+        <app-icon name="globe" [size]="13" /> {{ otherLang() }}
       </button>
     </header>
 
@@ -62,7 +62,7 @@
       <app-icon name="list" /><span>{{ 'nav.transactions' | t }}</span>
     </a>
     <a class="fab" routerLink="/transactions/new" [attr.aria-label]="'tx.new' | t">
-      <app-icon name="plus" [size]="28" />
+      <app-icon name="plus" [size]="22" />
     </a>
     <a routerLink="/accounts" routerLinkActive="active">
       <app-icon name="wallet" /><span>{{ 'nav.accounts' | t }}</span>
