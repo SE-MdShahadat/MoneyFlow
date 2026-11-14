@@ -551,31 +551,32 @@ button {
   color: var(--transfer);
 }
 
-/* Category picker */
+/* Category picker: small wrapping pills (icon + name on one line) so the form stays short on phones. */
 .chip-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
-  gap: 5px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
 }
 .chip {
-  display: flex;
-  flex-direction: column;
+  display: inline-flex;
   align-items: center;
   gap: 2px;
-  padding: 6px 2px;
+  padding: 1px 7px 1px 4px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 99px;
   background: var(--surface);
   font-size: 10.5px;
-  line-height: 1.15;
-  text-align: center;
+  line-height: 1.45;
+  white-space: nowrap;
 }
 .chip .emoji {
-  font-size: 16px;
+  font-size: 11px;
+  line-height: 1;
 }
 .chip.on {
   border-color: var(--primary);
   background: var(--primary-soft);
+  color: var(--primary);
   font-weight: 600;
 }
 
