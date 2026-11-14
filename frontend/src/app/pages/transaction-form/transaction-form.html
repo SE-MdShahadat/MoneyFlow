@@ -131,11 +131,13 @@
                 </div>
                 <div class="day-amounts">
                   @for (d of rangeDates(); track d) {
-                    <label class="day-amount" [class.empty]="!hasAmount(d)">
+                    <div class="day-amount" [class.empty]="!hasAmount(d)">
                       <span>{{ dayLabel(d) }}</span>
                       <input type="number" inputmode="decimal" min="0" step="0.01" placeholder="0"
-                             [name]="'amt-' + d" [(ngModel)]="dayAmounts[d]" />
-                    </label>
+                             [name]="'amt-' + d" [(ngModel)]="dayAmounts[d]" [attr.aria-label]="dayLabel(d) + ' ' + ('field.amount' | t)" />
+                      <input type="text" class="day-note" maxlength="500" [placeholder]="form.note || ('field.note' | t)"
+                             [name]="'note-' + d" [(ngModel)]="dayNotes[d]" [attr.aria-label]="dayLabel(d) + ' ' + ('field.note' | t)" />
+                    </div>
                   }
                 </div>
                 <p class="multi-summary">

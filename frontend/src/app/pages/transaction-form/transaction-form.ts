@@ -60,6 +60,8 @@ export class TransactionFormPage implements OnInit {
   /** Multi-day with a different amount per date; blank or 0 means "no entry that day". */
   protected readonly perDay = signal(false);
   protected dayAmounts: Record<string, number | null> = {};
+  /** Optional note per date; an empty one falls back to the main note. */
+  protected dayNotes: Record<string, string> = {};
   /** Weekday buttons in Bangladesh order (Saturday first), labelled in the current language. */
   protected readonly weekdays = computed(() => {
     const fmt = new Intl.DateTimeFormat(this.i18n.locale(), { weekday: 'short' });
@@ -158,9 +160,9 @@ export class TransactionFormPage implements OnInit {
   }
 
   /** Days in the range that have an amount, with that amount. */
-  protected perDayEntries(): { date: string; amount: number }[] {
+  protected perDayEntries(): { date: string; amount: number; note: string | null }[] {
     return this.rangeDates()
-      .map((date) => ({ date, amount: Number(this.dayAmounts[date]) || 0 }))
+      .map((date) => ({ date, amount: Number(this.dayAmounts[date]) || 0, note: this.dayNotes[date]?.trim() || null }))
       .filter((x) => x.amount > 0);
   }
 
@@ -236,10 +238,13 @@ export class TransactionFormPage implements OnInit {
       if (this.toDate < f.date) return this.error.set(this.i18n.t('tx.badRange'));
       const days = perDay
         ? this.perDayEntries()
-        : this.rangeDates().map((date) => ({ date, amount: body.amount }));
+        : this.rangeDates().map((date) => ({ date, amount: body.amount, note: null }));
       if (!days.length) return this.error.set(this.i18n.t(perDay ? 'tx.noAmounts' : 'tx.noDays'));
       if (days.length > MAX_DAYS) return this.error.set(this.i18n.t('tx.tooManyDays', { n: MAX_DAYS }));
-      req$ = this.api.createTransactions(days.map(({ date, amount }) => ({ ...body, date, amount })));
+      // A day's own note wins; otherwise the main note is used.
+      req$ = this.api.createTransactions(
+        days.map(({ date, amount, note }) => ({ ...body, date, amount, note: note ?? body.note })),
+      );
     } else {
       req$ = id ? this.api.updateTransaction(id, body) : this.api.createTransaction(body);
     }
