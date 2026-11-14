@@ -13,10 +13,6 @@
 @if (data(); as d) {
   <!-- Summary numbers -->
   <section class="stats">
-    <div class="stat hero">
-      <span class="label">{{ 'dash.totalBalance' | t }}</span>
-      <span class="value">{{ d.totalBalance | money }}</span>
-    </div>
     @if (summary(); as s) {
       <div class="stat card bal">
         <span class="label"><span class="dot primary-bg"></span>{{ 'sum.accountBalance' | t }}</span>

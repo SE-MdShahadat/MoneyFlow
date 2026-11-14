@@ -6,7 +6,7 @@
   margin: 0;
 }
 
-/* Phone (6-col grid): total balance full width, then the two balance cards, then income/expense/saved. */
+/* 6-col grid: account balance | actual balance on the first row, income | expense | saved on the second. */
 .stats {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -20,6 +20,9 @@
   > .stat.bal {
     grid-column: span 3;
   }
+}
+.stat.bal .value {
+  font-size: 16px;
 }
 .stat .hint {
   font-size: 9.5px;
@@ -250,15 +253,11 @@ a.stat:hover .value {
 }
 
 @media (min-width: 900px) {
-  /* Laptop: total | account | actual on the first row, income | expense | saved below. */
   .stats {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 10px;
-    > .stat,
-    > .stat.hero,
-    > .stat.bal {
-      grid-column: auto;
-    }
+  }
+  .stat.bal .value {
+    font-size: 19px;
   }
   .stat {
     padding: 9px 12px;
