@@ -149,8 +149,8 @@ export class TxItem {
     const parts: string[] = [];
     if (this.showDate()) parts.push(this.i18n.date(tx.date));
     parts.push(tx.type === 'Transfer' ? `${tx.accountName} → ${tx.toAccountName ?? ''}` : tx.accountName);
-    if (tx.memberName) parts.push(tx.memberName);
     if (tx.note) parts.push(tx.note);
+    if (tx.memberName) parts.push(tx.memberName);
     return parts.join(' · ');
   });
 }
