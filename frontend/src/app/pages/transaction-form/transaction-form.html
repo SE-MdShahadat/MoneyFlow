@@ -1,0 +1,126 @@
+<div class="page-head">
+  <button type="button" class="icon-btn" (click)="goBack()" [attr.aria-label]="'action.back' | t">
+    <app-icon name="chevron-left" />
+  </button>
+  <h1>{{ (id() ? 'tx.edit' : 'tx.new') | t }}</h1>
+</div>
+
+<div class="form-wrap">
+  @if (!ready()) {
+    <p class="empty">{{ 'common.loading' | t }}</p>
+  } @else if (!accounts().length && !error()) {
+    <div class="card empty">
+      <p>{{ 'empty.needAccount' | t }}</p>
+      <a class="btn btn-primary" routerLink="/accounts">{{ 'nav.accounts' | t }}</a>
+    </div>
+  } @else {
+    <form class="card" (ngSubmit)="save()">
+      @if (!canModify()) {
+        <div class="alert alert-info">{{ 'tx.readOnly' | t }}</div>
+      }
+
+      <fieldset [disabled]="!canModify() || busy()">
+        <div class="seg type-seg">
+          @for (t of types; track t) {
+            <button type="button" [class]="t.toLowerCase()" [class.on]="type() === t" (click)="setType(t)">
+              {{ 'type.' + t | t }}
+            </button>
+          }
+        </div>
+
+        <div class="field amount-field">
+          <label for="amount">{{ 'field.amount' | t }} (৳)</label>
+          <input id="amount" name="amount" class="amount-input" [class]="type().toLowerCase()" type="number"
+                 inputmode="decimal" min="0.01" step="0.01" placeholder="0" required
+                 [(ngModel)]="form.amount" />
+        </div>
+
+        @if (type() !== 'Transfer') {
+          <div class="field">
+            <span class="field-label">{{ 'field.category' | t }}</span>
+            <div class="chip-grid">
+              @for (c of categories(); track c.id) {
+                <button type="button" class="chip" [class.on]="categoryId() === c.id" (click)="categoryId.set(c.id)"
+                        [attr.aria-pressed]="categoryId() === c.id">
+                  <span class="emoji">{{ c.icon }}</span>
+                  <span>{{ i18n.catName(c) }}</span>
+                </button>
+              }
+            </div>
+          </div>
+        }
+
+        <div class="row">
+          <div class="field">
+            <label for="account">{{ (type() === 'Transfer' ? 'field.fromAccount' : 'field.account') | t }}</label>
+            <select id="account" name="accountId" [(ngModel)]="form.accountId" required>
+              <option [ngValue]="null" disabled>{{ 'field.select' | t }}</option>
+              @for (a of accounts(); track a.id) {
+                <option [ngValue]="a.id">{{ a.name }} ({{ a.balance | money }})</option>
+              }
+            </select>
+          </div>
+
+          @if (type() === 'Transfer') {
+            <div class="field">
+              <label for="toAccount">{{ 'field.toAccount' | t }}</label>
+              <select id="toAccount" name="toAccountId" [(ngModel)]="form.toAccountId" required>
+                <option [ngValue]="null" disabled>{{ 'field.select' | t }}</option>
+                @for (a of accounts(); track a.id) {
+                  <option [ngValue]="a.id" [disabled]="a.id === form.accountId">{{ a.name }}</option>
+                }
+              </select>
+            </div>
+          } @else {
+            <div class="field">
+              <label for="date">{{ 'field.date' | t }}</label>
+              <input id="date" name="date" type="date" [(ngModel)]="form.date" required />
+            </div>
+          }
+        </div>
+
+        <div class="row">
+          @if (type() === 'Transfer') {
+            <div class="field">
+              <label for="date2">{{ 'field.date' | t }}</label>
+              <input id="date2" name="date" type="date" [(ngModel)]="form.date" required />
+            </div>
+          }
+          <div class="field" [class.span-2]="type() !== 'Transfer'">
+            <label for="member">{{ 'field.member' | t }} <span class="muted">({{ 'field.optional' | t }})</span></label>
+            <select id="member" name="memberId" [(ngModel)]="form.memberId">
+              <option [ngValue]="null">{{ 'field.none' | t }}</option>
+              @for (m of activeMembers(); track m.id) {
+                <option [ngValue]="m.id">{{ m.name }}{{ m.relation ? ' (' + m.relation + ')' : '' }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="note">{{ 'field.note' | t }} <span class="muted">({{ 'field.optional' | t }})</span></label>
+          <textarea id="note" name="note" rows="2" maxlength="500" [(ngModel)]="form.note"></textarea>
+        </div>
+      </fieldset>
+
+      @if (existing(); as e) {
+        <p class="muted small meta">{{ 'tx.by' | t: { name: e.createdByName } }}</p>
+      }
+
+      @if (error()) {
+        <div class="alert alert-error" role="alert">{{ error() }}</div>
+      }
+
+      @if (canModify()) {
+        <div class="actions">
+          @if (id()) {
+            <button type="button" class="btn btn-danger" (click)="remove()" [disabled]="busy()">
+              <app-icon name="trash" [size]="18" /> {{ 'action.delete' | t }}
+            </button>
+          }
+          <button type="submit" class="btn btn-primary" [disabled]="busy()">{{ 'action.save' | t }}</button>
+        </div>
+      }
+    </form>
+  }
+</div>

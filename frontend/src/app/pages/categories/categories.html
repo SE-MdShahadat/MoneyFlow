@@ -1,0 +1,80 @@
+<div class="page-head">
+  <h1>{{ 'nav.categories' | t }}</h1>
+  @if (auth.isAdmin()) {
+    <button type="button" class="btn btn-primary btn-sm" (click)="open('new')">
+      <app-icon name="plus" [size]="18" /> {{ 'cat.add' | t }}
+    </button>
+  }
+</div>
+
+@if (error()) {
+  <div class="alert alert-error" role="alert">{{ error() }}</div>
+}
+
+<div class="stack">
+  <div class="seg" style="max-width: 360px">
+    <button type="button" class="expense" [class.on]="tab() === 'Expense'" (click)="tab.set('Expense')">{{ 'type.Expense' | t }}</button>
+    <button type="button" class="income" [class.on]="tab() === 'Income'" (click)="tab.set('Income')">{{ 'type.Income' | t }}</button>
+  </div>
+
+  <div class="card">
+    <div class="list">
+      @for (c of list(); track c.id) {
+        <button type="button" class="list-row as-button" [class.inactive]="!c.isActive" (click)="open(c)" [disabled]="!auth.isAdmin()">
+          <span class="tx-icon" [style.background]="c.color + '22'">{{ c.icon }}</span>
+          <span class="grow">
+            <span class="title block">{{ i18n.catName(c) }}</span>
+            <span class="muted small">{{ i18n.lang() === 'bn' ? c.nameEn : c.nameBn }}</span>
+          </span>
+          <span class="swatch" [style.background]="c.color"></span>
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (!auth.isAdmin()) {
+    <p class="muted small">{{ 'common.adminOnly' | t }}</p>
+  }
+</div>
+
+<app-modal [open]="editing() !== null" [title]="(editing() === 'new' ? 'cat.add' : 'cat.edit') | t" (closed)="editing.set(null)">
+  <form (ngSubmit)="save()">
+    <div class="seg" style="margin-bottom: 14px">
+      <button type="button" class="expense" [class.on]="form.type === 'Expense'" (click)="form.type = 'Expense'">{{ 'type.Expense' | t }}</button>
+      <button type="button" class="income" [class.on]="form.type === 'Income'" (click)="form.type = 'Income'">{{ 'type.Income' | t }}</button>
+    </div>
+    <div class="field">
+      <label for="cat-bn">{{ 'field.nameBn' | t }}</label>
+      <input id="cat-bn" name="nameBn" [(ngModel)]="form.nameBn" required maxlength="100" />
+    </div>
+    <div class="field">
+      <label for="cat-en">{{ 'field.nameEn' | t }}</label>
+      <input id="cat-en" name="nameEn" [(ngModel)]="form.nameEn" required maxlength="100" />
+    </div>
+    <div class="row">
+      <div class="field">
+        <label for="cat-icon">{{ 'field.icon' | t }}</label>
+        <input id="cat-icon" name="icon" [(ngModel)]="form.icon" maxlength="8" />
+      </div>
+      <div class="field">
+        <label for="cat-color">{{ 'field.color' | t }}</label>
+        <input id="cat-color" name="color" type="color" [(ngModel)]="form.color" />
+      </div>
+    </div>
+    <div class="field">
+      <label for="cat-order">{{ 'field.sortOrder' | t }}</label>
+      <input id="cat-order" name="sortOrder" type="number" [(ngModel)]="form.sortOrder" />
+    </div>
+    <label class="check"><input type="checkbox" name="isActive" [(ngModel)]="form.isActive" /> {{ 'field.active' | t }}</label>
+
+    @if (formError()) {
+      <div class="alert alert-error" role="alert">{{ formError() }}</div>
+    }
+    <div class="actions">
+      @if (editing() !== 'new') {
+        <button type="button" class="btn btn-danger" (click)="remove()" [disabled]="busy()">{{ 'action.delete' | t }}</button>
+      }
+      <button type="submit" class="btn btn-primary" [disabled]="busy()">{{ 'action.save' | t }}</button>
+    </div>
+  </form>
+</app-modal>

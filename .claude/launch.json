@@ -1,0 +1,22 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "moneyflow-api",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": ["run", "--project", "backend/MoneyFlow.Api", "--launch-profile", "http"],
+      "port": 5080
+    },
+    {
+      "name": "moneyflow-api-test",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": [
+        "run", "--project", "backend/MoneyFlow.Api", "--no-launch-profile", "--",
+        "--environment", "Development",
+        "--urls", "http://localhost:5081",
+        "--ConnectionStrings:MoneyFlowDb", "Server=localhost;Database=MoneyFlow_Test;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true"
+      ],
+      "port": 5081
+    }
+  ]
+}

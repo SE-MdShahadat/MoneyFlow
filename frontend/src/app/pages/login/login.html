@@ -1,0 +1,79 @@
+<div class="login-wrap">
+  <div class="login-art">
+    <div class="art-inner">
+      <span class="brand-mark big">৳</span>
+      <h1>{{ 'app.name' | t }}</h1>
+      <p>{{ 'app.tagline' | t }}</p>
+    </div>
+  </div>
+
+  <div class="login-panel">
+    <div class="login-top">
+      <button type="button" class="lang-pill" (click)="i18n.toggle()">
+        <app-icon name="globe" [size]="16" /> {{ otherLang() }}
+      </button>
+    </div>
+
+    <div class="login-card">
+      <div class="mobile-brand">
+        <span class="brand-mark big">৳</span>
+        <h1>{{ 'app.name' | t }}</h1>
+        <p class="muted">{{ 'app.tagline' | t }}</p>
+      </div>
+
+      @if (showServer()) {
+        <form class="server-box" (ngSubmit)="saveServer()">
+          <div class="field">
+            <label for="server">{{ 'server.title' | t }}</label>
+            <input id="server" name="server" type="url" inputmode="url" autocapitalize="none" spellcheck="false"
+                   placeholder="https://xxxx.trycloudflare.com" [(ngModel)]="serverUrl" />
+            <span class="hint">{{ 'server.hint' | t }}</span>
+          </div>
+          <button class="btn btn-ghost btn-block" type="submit">{{ 'server.connect' | t }}</button>
+        </form>
+      }
+
+      @if (mode() === 'loading') {
+        <p class="empty">{{ 'common.loading' | t }}</p>
+      } @else {
+        <h2>{{ (mode() === 'setup' ? 'setup.title' : 'login.title') | t }}</h2>
+        @if (mode() === 'setup') {
+          <p class="muted small">{{ 'setup.subtitle' | t }}</p>
+        }
+
+        @if (error()) {
+          <div class="alert alert-error" role="alert">{{ error() }}</div>
+        }
+
+        <form (ngSubmit)="submit()" #f="ngForm">
+          @if (mode() === 'setup') {
+            <div class="field">
+              <label for="name">{{ 'field.name' | t }}</label>
+              <input id="name" name="name" [(ngModel)]="form.name" required maxlength="100" autocomplete="name" />
+            </div>
+          }
+          <div class="field">
+            <label for="username">{{ 'login.username' | t }}</label>
+            <input id="username" name="username" [(ngModel)]="form.username" required maxlength="50"
+                   autocomplete="username" autocapitalize="none" spellcheck="false" />
+          </div>
+          <div class="field">
+            <label for="password">{{ 'login.password' | t }}</label>
+            <input id="password" name="password" type="password" [(ngModel)]="form.password" required
+                   [minlength]="mode() === 'setup' ? 6 : 1"
+                   [attr.autocomplete]="mode() === 'setup' ? 'new-password' : 'current-password'" />
+            @if (mode() === 'setup') {
+              <span class="hint">{{ 'hint.minPassword' | t }}</span>
+            }
+          </div>
+          <button class="btn btn-primary btn-block" type="submit" [disabled]="busy() || f.invalid">
+            {{ (mode() === 'setup' ? 'setup.submit' : 'login.submit') | t }}
+          </button>
+        </form>
+        @if (!showServer()) {
+          <button type="button" class="link-btn" (click)="showServer.set(true)">{{ 'server.change' | t }}</button>
+        }
+      }
+    </div>
+  </div>
+</div>

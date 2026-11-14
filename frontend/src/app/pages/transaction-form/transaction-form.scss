@@ -1,0 +1,42 @@
+.form-wrap {
+  max-width: 640px;
+}
+
+fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+.type-seg {
+  margin-bottom: 16px;
+}
+
+.amount-field label {
+  text-align: center;
+}
+.amount-input.expense {
+  color: var(--expense);
+}
+.amount-input.income {
+  color: var(--income);
+}
+.amount-input.transfer {
+  color: var(--transfer);
+}
+
+.span-2 {
+  grid-column: 1 / -1;
+}
+
+.meta {
+  margin: 0 0 12px;
+}
+
+@media (max-width: 420px) {
+  .row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
