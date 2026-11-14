@@ -1,11 +1,10 @@
-﻿{
+{
   "name": "moneyflow-frontend",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "build:api": "ng build && node scripts/copy-to-api.mjs",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
@@ -29,6 +28,7 @@
     "@angular/forms": "^20.3.0",
     "@angular/platform-browser": "^20.3.0",
     "@angular/router": "^20.3.0",
+    "@supabase/supabase-js": "^2.119.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

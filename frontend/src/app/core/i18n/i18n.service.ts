@@ -1,4 +1,3 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, Pipe, PipeTransform, computed, effect, inject, signal } from '@angular/core';
 import { storageGet, storageSet } from '../config';
 import { Lang, TRANSLATIONS } from './translations';
@@ -73,16 +72,22 @@ export class I18nService {
     return this.lang() === 'bn' ? bnName || enName : enName || bnName;
   }
 
-  /** Turns an API error into a message in the current language. */
+  /**
+   * Turns any error (app, database or sign-in) into a message in the current language.
+   * Database triggers raise the code as the message (e.g. 'LAST_ADMIN'); Supabase Auth sets `code`.
+   */
   error(err: unknown): string {
-    if (err instanceof HttpErrorResponse) {
-      if (err.status === 0) return this.t('err.network');
-      const code = err.error?.code as string | undefined;
-      if (code && this.has(`err.${code}`)) return this.t(`err.${code}`);
-      if (err.status === 400) return this.t('err.validation');
-      if (typeof err.error?.message === 'string') return err.error.message;
+    const e = (err ?? {}) as { code?: string; message?: string; name?: string };
+    const message = typeof e.message === 'string' ? e.message : '';
+    if (/failed to fetch|networkerror|load failed/i.test(message) || e.name === 'AuthRetryableFetchError') {
+      return this.t('err.network');
     }
-    return this.t('err.generic');
+    for (const code of [message, e.code]) {
+      if (code && this.has(`err.${code}`)) return this.t(`err.${code}`);
+    }
+    if (e.code === '42501') return this.t('err.FORBIDDEN');
+    if (e.code && /^2[23]/.test(e.code)) return this.t('err.validation');
+    return message || this.t('err.generic');
   }
 }
 

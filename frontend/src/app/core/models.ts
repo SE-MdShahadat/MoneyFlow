@@ -13,18 +13,14 @@ export const ACCOUNT_ICONS: Record<AccountType, string> = {
   Other: '👛',
 };
 
+/** A family member (Supabase auth user + profile). `isActive` is false until an admin approves them. */
 export interface User {
-  id: number;
+  id: string;
   name: string;
-  username: string;
+  email: string | null;
   role: UserRole;
   relation: string | null;
   isActive: boolean;
-}
-
-export interface LoginResponse {
-  token: string;
-  user: User;
 }
 
 export interface Account {
@@ -72,10 +68,10 @@ export interface Transaction {
   categoryNameBn: string | null;
   categoryIcon: string | null;
   categoryColor: string | null;
-  memberId: number | null;
+  memberId: string | null;
   memberName: string | null;
   note: string | null;
-  createdById: number;
+  createdById: string;
   createdByName: string;
   createdAt: string;
 }
@@ -87,17 +83,16 @@ export interface TransactionSave {
   accountId: number;
   toAccountId: number | null;
   categoryId: number | null;
-  memberId: number | null;
+  memberId: string | null;
   note: string | null;
 }
 
 export interface TransactionQuery {
-  from?: string;
-  to?: string;
+  from: string;
+  to: string;
   type?: TransactionType;
   accountId?: number;
-  categoryId?: number;
-  memberId?: number;
+  memberId?: string;
   search?: string;
   page?: number;
   pageSize?: number;
@@ -112,12 +107,9 @@ export interface TransactionPage {
 
 export interface UserSave {
   name: string;
-  username?: string;
-  password?: string;
-  newPassword?: string | null;
   role: UserRole;
   relation: string | null;
-  isActive?: boolean;
+  isActive: boolean;
 }
 
 export interface CategoryTotal {
@@ -130,7 +122,7 @@ export interface CategoryTotal {
 }
 
 export interface MemberTotal {
-  memberId: number | null;
+  memberId: string | null;
   name: string;
   amount: number;
 }

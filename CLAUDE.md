@@ -4,47 +4,40 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-MoneyFlow is a family finance tracker (income, expense, transfers between accounts; bills, loans, budgets and reports are planned). One family per installation. UI is bilingual (Bangla default, English toggle) and responsive: bottom tab bar + FAB on phones, sidebar on screens ≥900px.
+MoneyFlow is a family finance tracker (income, expense, transfers between accounts; bills, loans, budgets and reports are planned). One family per Supabase project. The UI is bilingual (Bangla default, English toggle) and responsive: bottom tab bar + FAB on phones, sidebar on screens ≥900px. It must stay usable from any network on Android and laptop with free hosting only.
 
-## Layout
+## Architecture
 
-- `backend/` — ASP.NET Core 9 Web API (`MoneyFlow.Api`), EF Core 9 + SQL Server, JWT auth, BCrypt passwords.
-- `frontend/` — Angular 20 (standalone components, signals, **zoneless**, hash routing), plain SCSS, no UI library.
-- The production Angular build is copied into `backend/MoneyFlow.Api/wwwroot` (git-ignored), so one `dotnet run` serves UI + API on port 5080.
+- `frontend/`: Angular 20 (standalone components, signals, **zoneless**, hash routing), plain SCSS, no UI library. Deployed to GitHub Pages by `.github/workflows/deploy-pages.yml` on push to `main` (https://se-mdshahadat.github.io/MoneyFlow/).
+- `supabase/schema.sql`: the whole backend. Tables, Row Level Security policies, triggers, views and RPC functions on Supabase (PostgreSQL). There is no custom server; the browser talks to Supabase directly with `@supabase/supabase-js`.
+- `frontend/public/config.js`: Supabase URL + publishable key, read at runtime (no rebuild to switch projects). The publishable key is public by design; security comes from RLS.
 
 ## Commands
 
 ```bash
-# Backend (from backend/)
-dotnet build MoneyFlow.sln
-dotnet run --project MoneyFlow.Api                              # http://0.0.0.0:5080, applies migrations on startup
-dotnet ef migrations add <Name> --project MoneyFlow.Api -o Data/Migrations   # dotnet-ef is a local tool (.config/dotnet-tools.json)
-
-# Frontend (from frontend/)
-npm start            # ng serve on :4200, proxies /api to :5080 (proxy.conf.json)
-npm run build:api    # production build + copy into backend wwwroot
+cd frontend
+npm start            # dev server on :4200 against the configured Supabase project
+npx ng build         # production build into frontend/dist/frontend/browser
 ```
 
-No automated tests exist yet. `.claude/launch.json` has `moneyflow-api-test`, which runs the API on :5081 against a throwaway `MoneyFlow_Test` database — use it for manual/browser testing so the real `MoneyFlow` DB is not touched (the first-run admin setup can only happen once per DB).
+No automated tests exist yet. Schema changes: edit `supabase/schema.sql` and apply the change in the Supabase SQL Editor (there is no migration tool; write additive `alter`/`create or replace` statements for an existing project).
 
-## Configuration
+## Data and security model
 
-- Connection string: `ConnectionStrings:MoneyFlowDb` in `appsettings.json`, overridable with env var `ConnectionStrings__MoneyFlowDb`. Only the SQL Server provider is wired up.
-- JWT key: `Jwt:Key` if set (≥32 chars); otherwise auto-generated once into `App_Data/jwt.key` (git-ignored).
-- `Cors:Origins` only matters when the UI is served from another origin.
-- Frontend API address is read at runtime from `frontend/public/config.js` (`apiUrl`, empty = same origin), so a static host such as GitHub Pages can point at a remote API without rebuilding.
+- Sign-up is open; a trigger on `auth.users` creates a `profiles` row. The first profile becomes the active Admin; later ones are inactive until an admin approves them (`is_active`). `is_member()` / `is_admin()` gate every policy.
+- Admin manages accounts, categories, members; Members read everything, add entries, edit/delete only their own (`created_by`, set by trigger). A trigger refuses to remove the last active admin.
+- RLS-blocked updates/deletes affect 0 rows without an error, so `ApiService` asks for the changed ids back (`changedOne`) and turns 0 into `FORBIDDEN`.
+- Account balances are computed in the `account_balances` view, never stored. Transfers have no category. Deleting an account/category that has entries only deactivates it (FK error 23503 → set `is_active = false`).
+- DB columns are snake_case; `core/mappers.ts` converts to the camelCase models. The `dashboard` RPC returns camelCase JSON directly (except `recent`, which is mapped).
 
 ## Conventions
 
-- Enums travel as strings in JSON and are stored as strings in the DB.
-- API errors return `{ code, message }`; the frontend translates `err.<code>` keys (`core/i18n/translations.ts`). Add both `en` and `bn` strings for any new key.
-- Account balances are computed (opening balance + transaction flows), never stored. Transfers move money between accounts and have no category.
-- Deleting an account/category that has transactions only deactivates it.
-- Roles: `Admin` manages accounts, categories and members; `Member` can add entries and edit/delete only their own. The API refuses to remove the last active admin.
+- Errors are translated by code: Postgres trigger messages (`LAST_ADMIN`, `CATEGORY_REQUIRED`), Supabase Auth `code`s (`invalid_credentials`, …) and app `AppError` codes all map to `err.<code>` keys in `core/i18n/translations.ts`. Add both `en` and `bn` strings for any new key.
 - Templates use the `t`, `money`, `bdate`, `num` pipes (impure, so they react to the language signal).
+- Supabase Auth setting "Confirm email" is turned off for this project; sign-up returns a session immediately.
 
 ## Repository notes
 
-- Branches: `main` (default, PR target), `qc`, and `dev_shahadat` (working branch). All are tracked on `origin`.
+- Branches: `main` (default, deploys to Pages), `qc`, and `dev_shahadat` (working branch). All are tracked on `origin`.
 - License: GPL-3.0. Any dependency added must be GPL-compatible (current ones are MIT).
-- On this Windows machine, `git` is not on the PowerShell `PATH`, so git commands need the full path to the executable or a shell that has git available.
+- On this Windows machine, `git` is not on the PowerShell `PATH`; use the full path `C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer\Git\cmd\git.exe`.

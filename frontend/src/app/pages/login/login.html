@@ -21,59 +21,49 @@
         <p class="muted">{{ 'app.tagline' | t }}</p>
       </div>
 
-      @if (showServer()) {
-        <form class="server-box" (ngSubmit)="saveServer()">
-          <div class="field">
-            <label for="server">{{ 'server.title' | t }}</label>
-            <input id="server" name="server" type="url" inputmode="url" autocapitalize="none" spellcheck="false"
-                   placeholder="https://xxxx.trycloudflare.com" [(ngModel)]="serverUrl" />
-            <span class="hint">{{ 'server.hint' | t }}</span>
-          </div>
-          <button class="btn btn-ghost btn-block" type="submit">{{ 'server.connect' | t }}</button>
-        </form>
+      <div class="seg tabs" role="tablist">
+        <button type="button" role="tab" [class.on]="mode() === 'login'" [attr.aria-selected]="mode() === 'login'"
+                (click)="setMode('login')">{{ 'login.title' | t }}</button>
+        <button type="button" role="tab" [class.on]="mode() === 'signup'" [attr.aria-selected]="mode() === 'signup'"
+                (click)="setMode('signup')">{{ 'login.signupTab' | t }}</button>
+      </div>
+
+      @if (mode() === 'signup') {
+        <p class="muted small">{{ 'login.signupHint' | t }}</p>
       }
 
-      @if (mode() === 'loading') {
-        <p class="empty">{{ 'common.loading' | t }}</p>
-      } @else {
-        <h2>{{ (mode() === 'setup' ? 'setup.title' : 'login.title') | t }}</h2>
-        @if (mode() === 'setup') {
-          <p class="muted small">{{ 'setup.subtitle' | t }}</p>
-        }
+      @if (pending()) {
+        <div class="alert alert-info" role="status">{{ 'login.pending' | t }}</div>
+      }
+      @if (error()) {
+        <div class="alert alert-error" role="alert">{{ error() }}</div>
+      }
 
-        @if (error()) {
-          <div class="alert alert-error" role="alert">{{ error() }}</div>
+      <form (ngSubmit)="submit()" #f="ngForm">
+        @if (mode() === 'signup') {
+          <div class="field">
+            <label for="name">{{ 'field.name' | t }}</label>
+            <input id="name" name="name" [(ngModel)]="form.name" required maxlength="100" autocomplete="name" />
+          </div>
         }
-
-        <form (ngSubmit)="submit()" #f="ngForm">
-          @if (mode() === 'setup') {
-            <div class="field">
-              <label for="name">{{ 'field.name' | t }}</label>
-              <input id="name" name="name" [(ngModel)]="form.name" required maxlength="100" autocomplete="name" />
-            </div>
+        <div class="field">
+          <label for="email">{{ 'login.email' | t }}</label>
+          <input id="email" name="email" type="email" inputmode="email" [(ngModel)]="form.email" required email
+                 autocomplete="email" autocapitalize="none" spellcheck="false" />
+        </div>
+        <div class="field">
+          <label for="password">{{ 'login.password' | t }}</label>
+          <input id="password" name="password" type="password" [(ngModel)]="form.password" required
+                 [minlength]="mode() === 'signup' ? 6 : 1"
+                 [attr.autocomplete]="mode() === 'signup' ? 'new-password' : 'current-password'" />
+          @if (mode() === 'signup') {
+            <span class="hint">{{ 'hint.minPassword' | t }}</span>
           }
-          <div class="field">
-            <label for="username">{{ 'login.username' | t }}</label>
-            <input id="username" name="username" [(ngModel)]="form.username" required maxlength="50"
-                   autocomplete="username" autocapitalize="none" spellcheck="false" />
-          </div>
-          <div class="field">
-            <label for="password">{{ 'login.password' | t }}</label>
-            <input id="password" name="password" type="password" [(ngModel)]="form.password" required
-                   [minlength]="mode() === 'setup' ? 6 : 1"
-                   [attr.autocomplete]="mode() === 'setup' ? 'new-password' : 'current-password'" />
-            @if (mode() === 'setup') {
-              <span class="hint">{{ 'hint.minPassword' | t }}</span>
-            }
-          </div>
-          <button class="btn btn-primary btn-block" type="submit" [disabled]="busy() || f.invalid">
-            {{ (mode() === 'setup' ? 'setup.submit' : 'login.submit') | t }}
-          </button>
-        </form>
-        @if (!showServer()) {
-          <button type="button" class="link-btn" (click)="showServer.set(true)">{{ 'server.change' | t }}</button>
-        }
-      }
+        </div>
+        <button class="btn btn-primary btn-block" type="submit" [disabled]="busy() || f.invalid">
+          {{ (mode() === 'signup' ? 'login.signupSubmit' : 'login.submit') | t }}
+        </button>
+      </form>
     </div>
   </div>
 </div>

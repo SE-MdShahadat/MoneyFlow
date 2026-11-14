@@ -1,48 +1,45 @@
 # MoneyFlow
 
-Family income & expense tracker — works like a mobile app on phones and like a dashboard on laptops. Bangla / English.
+Family income & expense tracker. Works like a mobile app on Android and like a dashboard on a laptop, from any network. Bangla / English.
 
-## Run it on your laptop
+**Open the app:** https://se-mdshahadat.github.io/MoneyFlow/
 
-Requirements: .NET 9 SDK, Node.js 20+, SQL Server (Express/Developer is fine).
+## How it is built (all free)
 
-Easiest: double-click `start.cmd` in the project folder. It builds the UI the first time, starts the server and opens the browser. Close the window to stop.
+| Part | Where |
+|---|---|
+| Source code | This GitHub repository |
+| Web app (Angular) | GitHub Pages, deployed automatically on every push to `main` |
+| Database + login | [Supabase](https://supabase.com) (PostgreSQL), free plan |
 
-Manual steps:
+Nothing needs to run on your own computer.
+
+## Using it
+
+1. Open the link above. The **first** person to tap *Create account* becomes the admin.
+2. Family members open the same link and tap *Create account*. The admin approves them under **Family**.
+3. On Android: Chrome menu ⋮ → **Add to Home screen**, so it opens like an app.
+
+## Database
+
+- Schema, security rules and default categories: [`supabase/schema.sql`](supabase/schema.sql) (run once in Supabase → SQL Editor on a new project).
+- See the data: Supabase dashboard → **Table Editor** or **SQL Editor**.
+- Connection string for other tools: Supabase dashboard → **Connect**.
+- Supabase's free plan pauses a project after about a week with no use; open the dashboard and press *Restore* if that happens.
+
+### Move to another Supabase project
+
+1. Create the project and run `supabase/schema.sql` in its SQL Editor.
+2. In Authentication → Sign In / Providers → Email, turn **Confirm email** off.
+3. Put the new project URL and publishable key in [`frontend/public/config.js`](frontend/public/config.js) and push to `main`.
+
+## Development
 
 ```bash
 cd frontend
 npm install
-npm run build:api
-cd ../backend
-dotnet run --project MoneyFlow.Api
+npm start        # http://localhost:4200, uses the Supabase project from public/config.js
 ```
-
-Open http://localhost:5080. The database (`MoneyFlow`) is created automatically on first start, and the first screen asks you to create the admin account.
-
-### Use it from a phone on the same Wi-Fi
-
-1. Find the laptop's IP: `ipconfig` → IPv4 Address (e.g. `192.168.0.105`).
-2. Allow port 5080 through Windows Firewall once (admin PowerShell):
-   `New-NetFirewallRule -DisplayName "MoneyFlow" -Direction Inbound -Protocol TCP -LocalPort 5080 -Action Allow -Profile Private`
-3. On the phone open `http://192.168.0.105:5080` and use **Add to Home Screen**.
-
-## Use a different database
-
-Edit `backend/MoneyFlow.Api/appsettings.json`:
-
-```json
-"ConnectionStrings": {
-  "MoneyFlowDb": "Server=YOUR_SERVER;Database=MoneyFlow;User Id=...;Password=...;TrustServerCertificate=True;"
-}
-```
-
-or set the environment variable `ConnectionStrings__MoneyFlowDb` (keeps passwords out of git).
-
-## Development
-
-- API: `dotnet run --project backend/MoneyFlow.Api` (port 5080)
-- UI with live reload: `cd frontend && npm start` → http://localhost:4200 (calls the API through a proxy)
 
 ## License
 

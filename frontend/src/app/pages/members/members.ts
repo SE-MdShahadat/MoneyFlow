@@ -1,23 +1,18 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { I18N_PIPES, I18nService } from '../../core/i18n/i18n.service';
-import { User, UserRole } from '../../core/models';
-import { Icon, Modal } from '../../shared/ui';
+import { User, UserRole, UserSave } from '../../core/models';
+import { Modal } from '../../shared/ui';
 
-interface MemberForm {
-  name: string;
-  username: string;
-  password: string;
-  role: UserRole;
-  relation: string;
-  isActive: boolean;
-}
-
+/**
+ * Family members. People join by creating an account themselves (login page);
+ * an admin approves them here and can change their role.
+ */
 @Component({
   selector: 'app-members',
-  imports: [FormsModule, Icon, Modal, ...I18N_PIPES],
+  imports: [FormsModule, Modal, ...I18N_PIPES],
   templateUrl: './members.html',
 })
 export class MembersPage {
@@ -28,18 +23,15 @@ export class MembersPage {
 
   protected readonly members = signal<User[]>([]);
   protected readonly error = signal('');
+  protected readonly pendingCount = computed(() => this.members().filter((m) => !m.isActive).length);
 
-  protected readonly editing = signal<User | 'new' | null>(null);
+  protected readonly editing = signal<User | null>(null);
   protected readonly busy = signal(false);
   protected readonly formError = signal('');
-  protected form: MemberForm = this.blank();
+  protected form: UserSave = { name: '', role: 'Member', relation: null, isActive: true };
 
   constructor() {
     this.load();
-  }
-
-  private blank(): MemberForm {
-    return { name: '', username: '', password: '', role: 'Member', relation: '', isActive: true };
   }
 
   private load(): void {
@@ -49,38 +41,30 @@ export class MembersPage {
     });
   }
 
-  protected open(u: User | 'new'): void {
+  protected open(u: User): void {
     if (!this.auth.isAdmin()) return;
-    this.form =
-      u === 'new'
-        ? this.blank()
-        : { name: u.name, username: u.username, password: '', role: u.role, relation: u.relation ?? '', isActive: u.isActive };
+    this.form = { name: u.name, role: u.role, relation: u.relation, isActive: u.isActive };
     this.formError.set('');
     this.editing.set(u);
   }
 
+  protected approve(u: User, event: Event): void {
+    event.stopPropagation();
+    this.saveMember(u.id, { name: u.name, role: u.role, relation: u.relation, isActive: true });
+  }
+
   protected save(): void {
     const target = this.editing();
-    if (!target || this.busy()) return;
-    const f = this.form;
-    const isNew = target === 'new';
-    if (!f.name.trim() || (isNew && (!f.username.trim() || f.password.length < 6)) || (!isNew && f.password && f.password.length < 6)) {
-      return this.formError.set(this.i18n.t('err.validation'));
-    }
+    if (!target) return;
+    if (!this.form.name.trim()) return this.formError.set(this.i18n.t('err.validation'));
+    this.saveMember(target.id, { ...this.form, relation: this.form.relation?.trim() || null });
+  }
 
+  private saveMember(id: string, body: UserSave): void {
+    if (this.busy()) return;
     this.busy.set(true);
-    const relation = f.relation.trim() || null;
-    const req$ = isNew
-      ? this.api.createUser({ name: f.name, username: f.username, password: f.password, role: f.role, relation })
-      : this.api.updateUser(target.id, {
-          name: f.name,
-          role: f.role,
-          relation,
-          isActive: f.isActive,
-          newPassword: f.password || null,
-        });
-
-    req$.subscribe({
+    this.error.set('');
+    this.api.updateUser(id, body).subscribe({
       next: (saved) => {
         if (saved.id === this.auth.user()?.id) this.auth.updateUser(saved);
         this.busy.set(false);
@@ -89,7 +73,9 @@ export class MembersPage {
       },
       error: (e) => {
         this.busy.set(false);
-        this.formError.set(this.i18n.error(e));
+        const msg = this.i18n.error(e);
+        if (this.editing()) this.formError.set(msg);
+        else this.error.set(msg);
       },
     });
   }

@@ -24,7 +24,7 @@ export class TransactionsPage {
   protected readonly period = signal<Period>(currentPeriod());
   protected readonly type = signal<TransactionType | ''>('');
   protected readonly accountId = signal<number | null>(null);
-  protected readonly memberId = signal<number | null>(null);
+  protected readonly memberId = signal<string | null>(null);
   protected readonly search = signal('');
   protected readonly types: (TransactionType | '')[] = ['', 'Expense', 'Income', 'Transfer'];
 

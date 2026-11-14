@@ -9,7 +9,7 @@
       <span class="avatar">{{ (auth.user()?.name ?? '?').charAt(0).toUpperCase() }}</span>
       <span class="grow">
         <span class="title block">{{ auth.user()?.name }}</span>
-        <span class="muted small">{{ '@' + auth.user()?.username }} · {{ 'role.' + auth.user()?.role | t }}</span>
+        <span class="muted small">{{ auth.user()?.email }} · {{ 'role.' + auth.user()?.role | t }}</span>
       </span>
     </div>
   </div>
@@ -21,6 +21,12 @@
       <button type="button" [class.on]="i18n.lang() === 'bn'" (click)="i18n.lang.set('bn')">বাংলা</button>
       <button type="button" [class.on]="i18n.lang() === 'en'" (click)="i18n.lang.set('en')">English</button>
     </div>
+  </div>
+
+  <!-- Install as an app -->
+  <div class="card">
+    <div class="card-head"><h2>{{ 'set.install' | t }}</h2></div>
+    <p class="muted small" style="margin: 0">{{ 'set.installHint' | t }}</p>
   </div>
 
   <!-- Manage (shortcuts; on phones these pages are not in the bottom bar) -->

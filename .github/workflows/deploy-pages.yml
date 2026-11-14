@@ -1,7 +1,5 @@
-# Builds the Angular app and publishes it to GitHub Pages.
-# The API is not hosted here; set the repository variable MONEYFLOW_API_URL
-# (Settings → Secrets and variables → Actions → Variables) to the API's public HTTPS address.
-# People can also change the address from the app's sign-in screen.
+# Builds the Angular app and publishes it to GitHub Pages on every push to main.
+# The app talks straight to Supabase; its address and public key are in frontend/public/config.js.
 name: Deploy to GitHub Pages
 
 on:
@@ -37,12 +35,6 @@ jobs:
       - run: npm ci
 
       - run: npx ng build --configuration production
-
-      - name: Write runtime config
-        env:
-          API_URL: ${{ vars.MONEYFLOW_API_URL }}
-        run: |
-          node -e "require('fs').writeFileSync('dist/frontend/browser/config.js', 'window.MONEYFLOW_CONFIG = ' + JSON.stringify({ apiUrl: process.env.API_URL || '' }) + ';\n')"
 
       - uses: actions/upload-pages-artifact@v3
         with:

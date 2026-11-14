@@ -1,9 +1,7 @@
 <div class="page-head">
   <h1>{{ 'nav.members' | t }}</h1>
-  @if (auth.isAdmin()) {
-    <button type="button" class="btn btn-primary btn-sm" (click)="open('new')">
-      <app-icon name="plus" [size]="18" /> {{ 'mem.add' | t }}
-    </button>
+  @if (pendingCount()) {
+    <span class="badge pending-badge">{{ 'mem.pendingCount' | t: { n: pendingCount() } }}</span>
   }
 </div>
 
@@ -15,50 +13,44 @@
   <div class="card">
     <div class="list">
       @for (m of members(); track m.id) {
-        <button type="button" class="list-row as-button" [class.inactive]="!m.isActive" (click)="open(m)" [disabled]="!auth.isAdmin()">
-          <span class="avatar">{{ m.name.charAt(0).toUpperCase() }}</span>
-          <span class="grow">
-            <span class="title block">
-              {{ m.name }}
-              @if (m.id === auth.user()?.id) { <span class="badge">{{ 'mem.you' | t }}</span> }
+        <div class="list-row" [class.inactive]="!m.isActive">
+          <button type="button" class="list-row as-button grow-btn" (click)="open(m)" [disabled]="!auth.isAdmin()">
+            <span class="avatar">{{ m.name.charAt(0).toUpperCase() }}</span>
+            <span class="grow">
+              <span class="title block">
+                {{ m.name }}
+                @if (m.id === auth.user()?.id) { <span class="badge">{{ 'mem.you' | t }}</span> }
+              </span>
+              <span class="muted small">
+                {{ m.email }}{{ m.relation ? ' · ' + m.relation : '' }}
+                @if (!m.isActive) { · {{ 'mem.inactive' | t }} }
+              </span>
             </span>
-            <span class="muted small">
-              {{ '@' + m.username }}{{ m.relation ? ' · ' + m.relation : '' }}
-              @if (!m.isActive) { · {{ 'mem.inactive' | t }} }
-            </span>
-          </span>
-          <span class="badge">{{ 'role.' + m.role | t }}</span>
-        </button>
+            <span class="badge">{{ 'role.' + m.role | t }}</span>
+          </button>
+          @if (!m.isActive && auth.isAdmin()) {
+            <button type="button" class="btn btn-primary btn-sm" (click)="approve(m, $event)" [disabled]="busy()">
+              {{ 'mem.approve' | t }}
+            </button>
+          }
+        </div>
       }
     </div>
   </div>
 
-  @if (!auth.isAdmin()) {
-    <p class="muted small">{{ 'common.adminOnly' | t }}</p>
-  }
+  <p class="muted small">{{ (auth.isAdmin() ? 'mem.howToAdd' : 'common.adminOnly') | t }}</p>
 </div>
 
-<app-modal [open]="editing() !== null" [title]="(editing() === 'new' ? 'mem.add' : 'mem.edit') | t" (closed)="editing.set(null)">
+<app-modal [open]="editing() !== null" [title]="'mem.edit' | t" (closed)="editing.set(null)">
   <form (ngSubmit)="save()">
+    <p class="muted small">{{ editing()?.email }}</p>
     <div class="field">
       <label for="m-name">{{ 'field.name' | t }}</label>
       <input id="m-name" name="name" [(ngModel)]="form.name" required maxlength="100" />
     </div>
-    <div class="row">
-      <div class="field">
-        <label for="m-user">{{ 'login.username' | t }}</label>
-        <input id="m-user" name="username" [(ngModel)]="form.username" [disabled]="editing() !== 'new'" required maxlength="50"
-               autocapitalize="none" autocomplete="off" spellcheck="false" />
-      </div>
-      <div class="field">
-        <label for="m-rel">{{ 'field.relation' | t }}</label>
-        <input id="m-rel" name="relation" [(ngModel)]="form.relation" maxlength="50" [placeholder]="'field.relationHint' | t" />
-      </div>
-    </div>
     <div class="field">
-      <label for="m-pass">{{ (editing() === 'new' ? 'login.password' : 'field.newPassword') | t }}</label>
-      <input id="m-pass" name="password" type="password" [(ngModel)]="form.password" autocomplete="new-password" />
-      <span class="hint">{{ (editing() === 'new' ? 'hint.minPassword' : 'hint.keepPassword') | t }}</span>
+      <label for="m-rel">{{ 'field.relation' | t }} <span class="muted">({{ 'field.optional' | t }})</span></label>
+      <input id="m-rel" name="relation" [(ngModel)]="form.relation" maxlength="50" [placeholder]="'field.relationHint' | t" />
     </div>
     <div class="field">
       <span class="field-label">{{ 'field.role' | t }}</span>
@@ -68,9 +60,7 @@
         }
       </div>
     </div>
-    @if (editing() !== 'new') {
-      <label class="check"><input type="checkbox" name="isActive" [(ngModel)]="form.isActive" /> {{ 'field.active' | t }}</label>
-    }
+    <label class="check"><input type="checkbox" name="isActive" [(ngModel)]="form.isActive" /> {{ 'field.active' | t }}</label>
 
     @if (formError()) {
       <div class="alert alert-error" role="alert">{{ formError() }}</div>

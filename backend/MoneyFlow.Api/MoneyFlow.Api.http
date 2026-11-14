@@ -1,6 +1,0 @@
-@host = http://localhost:5080
-
-GET {{host}}/api/auth/status
-Accept: application/json
-
-###

@@ -675,6 +675,21 @@ button {
 .list > .as-button + .as-button {
   border-top: 1px solid var(--border);
 }
+.list-row > .grow-btn {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+}
+.list-row.inactive > .grow-btn {
+  opacity: 0.6;
+}
+.list-row.inactive {
+  opacity: 1;
+}
+.pending-badge {
+  background: var(--expense-soft);
+  color: var(--expense);
+}
 .block {
   display: block;
 }

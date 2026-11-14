@@ -46,7 +46,7 @@ export class TransactionFormPage implements OnInit {
     date: todayIso(),
     accountId: null as number | null,
     toAccountId: null as number | null,
-    memberId: null as number | null,
+    memberId: null as string | null,
     note: '',
   };
 

@@ -1,7 +1,8 @@
-// MoneyFlow runtime settings.
-// apiUrl: leave empty when the .NET API serves this app (default).
-// If the UI is hosted elsewhere (e.g. GitHub Pages), put the API's public URL here,
-// for example: 'https://moneyflow-api.example.com'
+// MoneyFlow runtime settings: which Supabase project the app talks to.
+// The publishable key is meant to be public (it is shipped to every browser);
+// the data is protected by Row Level Security rules in supabase/schema.sql.
+// To use another Supabase project, change these two values. No rebuild needed.
 window.MONEYFLOW_CONFIG = {
-  apiUrl: '',
+  supabaseUrl: 'https://hpilbvjgdjbqvmgwkbhc.supabase.co',
+  supabaseKey: 'sb_publishable_NobTkEZA6VXIvmY0bvVFhw_HMtCTGy3',
 };
