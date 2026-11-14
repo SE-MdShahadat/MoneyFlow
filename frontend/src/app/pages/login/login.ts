@@ -33,7 +33,9 @@ export class LoginPage implements OnInit {
   protected serverUrl = apiBaseUrl();
 
   ngOnInit(): void {
-    this.checkStatus();
+    // On a static host with no server address yet there is nothing to ask; just show the address box.
+    if (this.showServer()) this.mode.set('login');
+    else this.checkStatus();
   }
 
   private checkStatus(): void {
