@@ -57,6 +57,9 @@ export class TransactionFormPage implements OnInit {
   protected toDate = todayIso();
   /** Weekdays (0 = Sunday … 6 = Saturday) left out of the range, e.g. Friday. */
   protected readonly skip = signal<ReadonlySet<number>>(new Set());
+  /** Multi-day with a different amount per date; blank or 0 means "no entry that day". */
+  protected readonly perDay = signal(false);
+  protected dayAmounts: Record<string, number | null> = {};
   /** Weekday buttons in Bangladesh order (Saturday first), labelled in the current language. */
   protected readonly weekdays = computed(() => {
     const fmt = new Intl.DateTimeFormat(this.i18n.locale(), { weekday: 'short' });
@@ -136,6 +139,47 @@ export class TransactionFormPage implements OnInit {
     if (on && this.toDate < this.form.date) this.toDate = this.form.date;
   }
 
+  protected setPerDay(on: boolean): void {
+    this.perDay.set(on);
+    this.error.set('');
+    if (on) this.fillEmpty();
+  }
+
+  /** Puts the main amount into every day of the range. */
+  protected fillAll(): void {
+    if (!this.form.amount) return;
+    for (const d of this.rangeDates()) this.dayAmounts[d] = this.form.amount;
+  }
+
+  /** Puts the main amount only into days that have no amount yet. */
+  private fillEmpty(): void {
+    if (!this.form.amount) return;
+    for (const d of this.rangeDates()) if (this.dayAmounts[d] == null) this.dayAmounts[d] = this.form.amount;
+  }
+
+  /** Days in the range that have an amount, with that amount. */
+  protected perDayEntries(): { date: string; amount: number }[] {
+    return this.rangeDates()
+      .map((date) => ({ date, amount: Number(this.dayAmounts[date]) || 0 }))
+      .filter((x) => x.amount > 0);
+  }
+
+  protected hasAmount(date: string): boolean {
+    return (Number(this.dayAmounts[date]) || 0) > 0;
+  }
+
+  protected perDayTotal(): number {
+    return this.perDayEntries().reduce((sum, x) => sum + x.amount, 0);
+  }
+
+  /** "Sat, 1 Nov" in the current language. */
+  protected dayLabel(iso: string): string {
+    const [y, m, d] = iso.split('-').map(Number);
+    return new Intl.DateTimeFormat(this.i18n.locale(), { weekday: 'short', day: 'numeric', month: 'short' }).format(
+      new Date(y, m - 1, d),
+    );
+  }
+
   protected toggleSkip(day: number): void {
     const next = new Set(this.skip());
     if (next.has(day)) next.delete(day);
@@ -168,7 +212,8 @@ export class TransactionFormPage implements OnInit {
     const f = this.form;
     const type = this.type();
 
-    if (!f.amount || f.amount <= 0) return this.error.set(this.i18n.t('err.validation'));
+    const perDay = !this.id() && this.multiDay() && this.perDay();
+    if (!perDay && (!f.amount || f.amount <= 0)) return this.error.set(this.i18n.t('err.validation'));
     if (!f.accountId) return this.error.set(this.i18n.t('err.ACCOUNT_REQUIRED'));
     if (type === 'Transfer' && (!f.toAccountId || f.toAccountId === f.accountId))
       return this.error.set(this.i18n.t('err.TO_ACCOUNT_INVALID'));
@@ -176,7 +221,7 @@ export class TransactionFormPage implements OnInit {
 
     const body: TransactionSave = {
       type,
-      amount: f.amount,
+      amount: f.amount ?? 0,
       date: f.date,
       accountId: f.accountId,
       toAccountId: type === 'Transfer' ? f.toAccountId : null,
@@ -189,10 +234,12 @@ export class TransactionFormPage implements OnInit {
     let req$: Observable<unknown>;
     if (!id && this.multiDay()) {
       if (this.toDate < f.date) return this.error.set(this.i18n.t('tx.badRange'));
-      const dates = this.rangeDates();
-      if (!dates.length) return this.error.set(this.i18n.t('tx.noDays'));
-      if (dates.length > MAX_DAYS) return this.error.set(this.i18n.t('tx.tooManyDays', { n: MAX_DAYS }));
-      req$ = this.api.createTransactions(dates.map((date) => ({ ...body, date })));
+      const days = perDay
+        ? this.perDayEntries()
+        : this.rangeDates().map((date) => ({ date, amount: body.amount }));
+      if (!days.length) return this.error.set(this.i18n.t(perDay ? 'tx.noAmounts' : 'tx.noDays'));
+      if (days.length > MAX_DAYS) return this.error.set(this.i18n.t('tx.tooManyDays', { n: MAX_DAYS }));
+      req$ = this.api.createTransactions(days.map(({ date, amount }) => ({ ...body, date, amount })));
     } else {
       req$ = id ? this.api.updateTransaction(id, body) : this.api.createTransaction(body);
     }

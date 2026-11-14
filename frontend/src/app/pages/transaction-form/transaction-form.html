@@ -31,7 +31,7 @@
         <div class="field amount-field">
           <label for="amount">{{ 'field.amount' | t }} (৳)</label>
           <input id="amount" name="amount" class="amount-input" [class]="type().toLowerCase()" type="number"
-                 inputmode="decimal" min="0.01" step="0.01" placeholder="0" required
+                 inputmode="decimal" min="0.01" step="0.01" placeholder="0" [required]="!(multiDay() && perDay())"
                  [(ngModel)]="form.amount" />
         </div>
 
@@ -118,9 +118,34 @@
                   }
                 </div>
               </div>
-              <p class="multi-summary">
-                {{ 'tx.multiSummary' | t: { n: rangeDates().length, amount: i18n.money(form.amount), total: i18n.money((form.amount ?? 0) * rangeDates().length) } }}
-              </p>
+              <label class="check">
+                <input type="checkbox" name="perDay" [ngModel]="perDay()" (ngModelChange)="setPerDay($event)" />
+                {{ 'tx.perDay' | t }}
+              </label>
+              @if (perDay()) {
+                <div class="day-amounts-head">
+                  <span class="muted small">{{ 'tx.perDayHint' | t }}</span>
+                  <button type="button" class="btn btn-ghost btn-sm" (click)="fillAll()" [disabled]="!form.amount">
+                    {{ 'tx.fillAll' | t: { amount: i18n.money(form.amount) } }}
+                  </button>
+                </div>
+                <div class="day-amounts">
+                  @for (d of rangeDates(); track d) {
+                    <label class="day-amount" [class.empty]="!hasAmount(d)">
+                      <span>{{ dayLabel(d) }}</span>
+                      <input type="number" inputmode="decimal" min="0" step="0.01" placeholder="0"
+                             [name]="'amt-' + d" [(ngModel)]="dayAmounts[d]" />
+                    </label>
+                  }
+                </div>
+                <p class="multi-summary">
+                  {{ 'tx.perDaySummary' | t: { n: perDayEntries().length, total: i18n.money(perDayTotal()) } }}
+                </p>
+              } @else {
+                <p class="multi-summary">
+                  {{ 'tx.multiSummary' | t: { n: rangeDates().length, amount: i18n.money(form.amount), total: i18n.money((form.amount ?? 0) * rangeDates().length) } }}
+                </p>
+              }
             }
           </div>
         }
