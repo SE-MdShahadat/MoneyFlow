@@ -1,0 +1,84 @@
+<div class="page-head">
+  <h1>{{ 'nav.accounts' | t }}</h1>
+  @if (auth.isAdmin()) {
+    <button type="button" class="btn btn-primary btn-sm" (click)="open('new')">
+      <app-icon name="plus" [size]="18" /> {{ 'acc.add' | t }}
+    </button>
+  }
+</div>
+
+@if (error()) {
+  <div class="alert alert-error" role="alert">{{ error() }}</div>
+}
+
+<div class="stack">
+  <div class="card">
+    <span class="muted small">{{ 'acc.total' | t }}</span>
+    <div class="big-number" [class.expense]="total() < 0">{{ total() | money }}</div>
+  </div>
+
+  <div class="card">
+    <div class="list">
+      @for (a of accounts(); track a.id) {
+        <button type="button" class="list-row as-button" [class.inactive]="!a.isActive" (click)="open(a)" [disabled]="!auth.isAdmin()">
+          <span class="tx-icon" style="background: var(--surface-2)">{{ icons[a.type] }}</span>
+          <span class="grow">
+            <span class="title">{{ a.name }}</span>
+            <span class="muted small block">
+              {{ 'acctype.' + a.type | t }}
+              @if (!a.isActive) { · {{ 'acc.inactive' | t }} }
+              @if (a.note) { · {{ a.note }} }
+            </span>
+          </span>
+          <strong [class.expense]="a.balance < 0">{{ a.balance | money }}</strong>
+        </button>
+      } @empty {
+        @if (loaded()) {
+          <p class="empty">{{ 'empty.accounts' | t }}</p>
+        }
+      }
+    </div>
+  </div>
+
+  @if (!auth.isAdmin()) {
+    <p class="muted small">{{ 'common.adminOnly' | t }}</p>
+  }
+</div>
+
+<app-modal [open]="editing() !== null" [title]="(editing() === 'new' ? 'acc.add' : 'acc.edit') | t" (closed)="editing.set(null)">
+  <form (ngSubmit)="save()">
+    <div class="field">
+      <label for="acc-name">{{ 'field.name' | t }}</label>
+      <input id="acc-name" name="name" [(ngModel)]="form.name" required maxlength="100" placeholder="bKash, DBBL, Cash…" />
+    </div>
+    <div class="row">
+      <div class="field">
+        <label for="acc-type">{{ 'field.type' | t }}</label>
+        <select id="acc-type" name="type" [(ngModel)]="form.type">
+          @for (t of types; track t) {
+            <option [ngValue]="t">{{ icons[t] }} {{ 'acctype.' + t | t }}</option>
+          }
+        </select>
+      </div>
+      <div class="field">
+        <label for="acc-open">{{ 'field.openingBalance' | t }}</label>
+        <input id="acc-open" name="openingBalance" type="number" inputmode="decimal" step="0.01" [(ngModel)]="form.openingBalance" />
+      </div>
+    </div>
+    <div class="field">
+      <label for="acc-note">{{ 'field.note' | t }} <span class="muted">({{ 'field.optional' | t }})</span></label>
+      <input id="acc-note" name="note" [(ngModel)]="form.note" maxlength="500" />
+    </div>
+    <label class="check"><input type="checkbox" name="isActive" [(ngModel)]="form.isActive" /> {{ 'field.active' | t }}</label>
+
+    @if (formError()) {
+      <div class="alert alert-error" role="alert">{{ formError() }}</div>
+    }
+    <div class="actions">
+      @if (editing() !== 'new') {
+        <button type="button" class="btn btn-danger" (click)="remove()" [disabled]="busy()">{{ 'action.delete' | t }}</button>
+      }
+      <button type="submit" class="btn btn-primary" [disabled]="busy()">{{ 'action.save' | t }}</button>
+    </div>
+  </form>
+</app-modal>

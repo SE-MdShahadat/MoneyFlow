@@ -1,0 +1,68 @@
+<div class="page-head">
+  <h1>{{ 'nav.settings' | t }}</h1>
+</div>
+
+<div class="stack" style="max-width: 640px">
+  <!-- Profile -->
+  <div class="card">
+    <div class="list-row">
+      <span class="avatar">{{ (auth.user()?.name ?? '?').charAt(0).toUpperCase() }}</span>
+      <span class="grow">
+        <span class="title block">{{ auth.user()?.name }}</span>
+        <span class="muted small">{{ '@' + auth.user()?.username }} · {{ 'role.' + auth.user()?.role | t }}</span>
+      </span>
+    </div>
+  </div>
+
+  <!-- Language -->
+  <div class="card">
+    <div class="card-head"><h2>{{ 'set.language' | t }}</h2></div>
+    <div class="seg">
+      <button type="button" [class.on]="i18n.lang() === 'bn'" (click)="i18n.lang.set('bn')">বাংলা</button>
+      <button type="button" [class.on]="i18n.lang() === 'en'" (click)="i18n.lang.set('en')">English</button>
+    </div>
+  </div>
+
+  <!-- Manage (shortcuts; on phones these pages are not in the bottom bar) -->
+  <div class="card">
+    <div class="card-head"><h2>{{ 'set.manage' | t }}</h2></div>
+    <div class="list">
+      <a class="list-row" routerLink="/accounts">
+        <app-icon name="wallet" /><span class="grow title">{{ 'nav.accounts' | t }}</span><app-icon name="chevron-right" [size]="18" />
+      </a>
+      <a class="list-row" routerLink="/categories">
+        <app-icon name="tag" /><span class="grow title">{{ 'nav.categories' | t }}</span><app-icon name="chevron-right" [size]="18" />
+      </a>
+      <a class="list-row" routerLink="/members">
+        <app-icon name="users" /><span class="grow title">{{ 'nav.members' | t }}</span><app-icon name="chevron-right" [size]="18" />
+      </a>
+    </div>
+  </div>
+
+  <!-- Password -->
+  <div class="card">
+    <div class="card-head"><h2>{{ 'set.changePassword' | t }}</h2></div>
+    <form (ngSubmit)="changePassword()">
+      <div class="field">
+        <label for="pw-cur">{{ 'field.currentPassword' | t }}</label>
+        <input id="pw-cur" name="current" type="password" autocomplete="current-password" [(ngModel)]="pw.current" />
+      </div>
+      <div class="field">
+        <label for="pw-new">{{ 'field.newPassword' | t }}</label>
+        <input id="pw-new" name="next" type="password" autocomplete="new-password" [(ngModel)]="pw.next" />
+        <span class="hint">{{ 'hint.minPassword' | t }}</span>
+      </div>
+      @if (pwError()) {
+        <div class="alert alert-error" role="alert">{{ pwError() }}</div>
+      }
+      @if (pwOk()) {
+        <div class="alert alert-ok" role="status">{{ 'set.passwordChanged' | t }}</div>
+      }
+      <button type="submit" class="btn btn-primary" [disabled]="busy()">{{ 'action.save' | t }}</button>
+    </form>
+  </div>
+
+  <button type="button" class="btn btn-ghost btn-block logout" (click)="auth.logout()">
+    <app-icon name="logout" [size]="18" /> {{ 'action.logout' | t }}
+  </button>
+</div>
