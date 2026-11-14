@@ -17,6 +17,18 @@
       <span class="label">{{ 'dash.totalBalance' | t }}</span>
       <span class="value">{{ d.totalBalance | money }}</span>
     </div>
+    @if (summary(); as s) {
+      <div class="stat card bal">
+        <span class="label"><span class="dot primary-bg"></span>{{ 'sum.accountBalance' | t }}</span>
+        <span class="value" [class.expense]="s.balance < 0">{{ s.balance | money }}</span>
+        <span class="muted hint">{{ 'sum.balanceHint' | t }}</span>
+      </div>
+      <div class="stat card bal actual">
+        <span class="label"><span class="dot primary-bg"></span>{{ 'sum.actual' | t }}</span>
+        <span class="value" [class.expense]="s.actual < 0">{{ s.actual | money }}</span>
+        <span class="muted hint">{{ 'sum.actualHintShort' | t }}</span>
+      </div>
+    }
     <div class="stat card">
       <span class="label"><span class="dot income-bg"></span>{{ 'dash.income' | t }}</span>
       <span class="value income">{{ d.income | money }}</span>

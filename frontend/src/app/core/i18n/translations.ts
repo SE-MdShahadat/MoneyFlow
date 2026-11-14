@@ -31,6 +31,8 @@ const en: Dict = {
   'sum.payable': 'Payable',
   'sum.actual': 'Actual balance',
   'sum.actualHint': 'Balance + Receivable − Payable',
+  'sum.accountBalance': 'Account balance',
+  'sum.actualHintShort': 'Account − Payable + Receivable',
   'nav.settings': 'Settings',
   'nav.more': 'More',
 
@@ -230,6 +232,8 @@ const bn: Dict = {
   'sum.payable': 'দেনা',
   'sum.actual': 'আসল ব্যালেন্স',
   'sum.actualHint': 'ব্যালেন্স + পাওনা − দেনা',
+  'sum.accountBalance': 'অ্যাকাউন্ট ব্যালেন্স',
+  'sum.actualHintShort': 'অ্যাকাউন্ট − দেনা + পাওনা',
   'nav.settings': 'সেটিংস',
   'nav.more': 'আরও',
 

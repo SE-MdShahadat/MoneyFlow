@@ -6,10 +6,35 @@
   margin: 0;
 }
 
+/* Phone (6-col grid): total balance full width, then the two balance cards, then income/expense/saved. */
 .stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 6px;
+  > .stat {
+    grid-column: span 2;
+  }
+  > .stat.hero {
+    grid-column: 1 / -1;
+  }
+  > .stat.bal {
+    grid-column: span 3;
+  }
+}
+.stat .hint {
+  font-size: 9.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.stat.actual {
+  border-color: var(--primary);
+  .value {
+    color: var(--primary);
+  }
+  .value.expense {
+    color: var(--expense);
+  }
 }
 .stat {
   display: flex;
@@ -48,8 +73,11 @@
 }
 
 .dues-stats {
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   margin-top: 6px;
+  > .stat {
+    grid-column: auto;
+  }
 }
 a.stat:hover .value {
   text-decoration: underline;
@@ -222,9 +250,15 @@ a.stat:hover .value {
 }
 
 @media (min-width: 900px) {
+  /* Laptop: total | account | actual on the first row, income | expense | saved below. */
   .stats {
-    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 10px;
+    > .stat,
+    > .stat.hero,
+    > .stat.bal {
+      grid-column: auto;
+    }
   }
   .stat {
     padding: 9px 12px;
