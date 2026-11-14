@@ -86,7 +86,7 @@
           </span>
         </div>
         <div class="trend" role="img" [attr.aria-label]="'dash.trend' | t">
-          @for (m of d.trend; track m.year * 100 + m.month) {
+          @for (m of trendNewestFirst(); track m.year * 100 + m.month) {
             <div class="trend-col" [title]="i18n.monthName(m.year, m.month) + ': +' + i18n.money(m.income) + ' / -' + i18n.money(m.expense)">
               <div class="trend-bars">
                 <span class="tb income-bg" [style.height.%]="(m.income / maxTrend()) * 100"></span>

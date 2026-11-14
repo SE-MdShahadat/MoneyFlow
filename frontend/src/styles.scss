@@ -609,6 +609,7 @@ button {
   align-items: center;
   gap: 8px;
   padding: 6px 2px;
+  min-width: 0;
 }
 .tx-item:hover .tx-title {
   color: var(--primary);
@@ -630,6 +631,9 @@ button {
 }
 .tx-title {
   font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .tx-sub {
   font-size: 11px;

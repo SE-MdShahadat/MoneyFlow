@@ -27,6 +27,8 @@ export class DashboardPage {
   protected readonly maxTrend = computed(() =>
     Math.max(1, ...(this.data()?.trend.flatMap((t) => [t.income, t.expense]) ?? [])),
   );
+  /** Last 6 months, newest month first (left). */
+  protected readonly trendNewestFirst = computed(() => [...(this.data()?.trend ?? [])].reverse());
   protected readonly savingsRate = computed(() => {
     const d = this.data();
     return d && d.income > 0 ? Math.round((d.net / d.income) * 100) : null;

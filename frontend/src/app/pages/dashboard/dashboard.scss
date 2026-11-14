@@ -101,9 +101,15 @@
   font-size: 13px;
 }
 
+/* minmax(0, 1fr) + min-width: 0 stop long text (notes, names) from widening the cards past the screen. */
 .dash-grid {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
+  > .stack,
+  .card {
+    min-width: 0;
+  }
 }
 
 .bar-row {
@@ -136,6 +142,12 @@
   gap: 6px;
   font-size: 12px;
   margin-bottom: 3px;
+  > span:first-child {
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 .bar-amt {
   font-weight: 600;
@@ -226,7 +238,7 @@
     padding: 0;
   }
   .dash-grid {
-    grid-template-columns: 1.3fr 1fr;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
     align-items: start;
   }
   .trend {
