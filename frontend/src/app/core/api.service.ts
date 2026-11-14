@@ -176,6 +176,11 @@ export class ApiService {
     return from(unwrap(db().from('transactions').insert(transactionRow(body))).then(() => undefined));
   }
 
+  /** Saves several entries in one request (all or nothing), e.g. the same expense on many days. */
+  createTransactions(bodies: TransactionSave[]): Observable<void> {
+    return from(unwrap(db().from('transactions').insert(bodies.map(transactionRow))).then(() => undefined));
+  }
+
   updateTransaction(id: number, body: TransactionSave): Observable<void> {
     return from(changedOne(db().from('transactions').update(transactionRow(body)).eq('id', id).select('id')));
   }

@@ -30,6 +30,32 @@ fieldset {
   grid-column: 1 / -1;
 }
 
+.multi-day {
+  margin-bottom: 9px;
+  padding: 7px 9px 1px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  .check {
+    margin-bottom: 6px;
+  }
+}
+.multi-day.on {
+  border-color: var(--primary);
+}
+.day-chip {
+  padding: 1px 9px;
+}
+.day-chip:not(.on) {
+  color: var(--muted);
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+.multi-summary {
+  margin: 0 0 6px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
 .meta {
   margin: 0 0 12px;
 }

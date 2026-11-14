@@ -73,7 +73,7 @@
             </div>
           } @else {
             <div class="field">
-              <label for="date">{{ 'field.date' | t }}</label>
+              <label for="date">{{ (multiDay() ? 'tx.fromDate' : 'field.date') | t }}</label>
               <input id="date" name="date" type="date" [(ngModel)]="form.date" required />
             </div>
           }
@@ -82,7 +82,7 @@
         <div class="row">
           @if (type() === 'Transfer') {
             <div class="field">
-              <label for="date2">{{ 'field.date' | t }}</label>
+              <label for="date2">{{ (multiDay() ? 'tx.fromDate' : 'field.date') | t }}</label>
               <input id="date2" name="date" type="date" [(ngModel)]="form.date" required />
             </div>
           }
@@ -96,6 +96,34 @@
             </select>
           </div>
         </div>
+
+        <!-- Same entry on many days (new entries only), e.g. daily office transport for 1–10 Nov -->
+        @if (!id()) {
+          <div class="multi-day" [class.on]="multiDay()">
+            <label class="check">
+              <input type="checkbox" name="multiDay" [ngModel]="multiDay()" (ngModelChange)="setMultiDay($event)" />
+              {{ 'tx.multiDay' | t }}
+            </label>
+            @if (multiDay()) {
+              <div class="field">
+                <label for="toDate">{{ 'tx.toDate' | t }}</label>
+                <input id="toDate" name="toDate" type="date" [(ngModel)]="toDate" [min]="form.date" required />
+              </div>
+              <div class="field">
+                <span class="field-label">{{ 'tx.skipDays' | t }}</span>
+                <div class="chip-grid">
+                  @for (d of weekdays(); track d.day) {
+                    <button type="button" class="chip day-chip" [class.on]="!skip().has(d.day)" (click)="toggleSkip(d.day)"
+                            [attr.aria-pressed]="!skip().has(d.day)">{{ d.label }}</button>
+                  }
+                </div>
+              </div>
+              <p class="multi-summary">
+                {{ 'tx.multiSummary' | t: { n: rangeDates().length, amount: i18n.money(form.amount), total: i18n.money((form.amount ?? 0) * rangeDates().length) } }}
+              </p>
+            }
+          </div>
+        }
 
         <div class="field">
           <label for="note">{{ 'field.note' | t }} <span class="muted">({{ 'field.optional' | t }})</span></label>

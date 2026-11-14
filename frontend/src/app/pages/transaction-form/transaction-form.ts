@@ -5,12 +5,14 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Observable, forkJoin, of } from 'rxjs';
 import { ApiService } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
-import { storageGet, storageSet, todayIso } from '../../core/config';
+import { storageGet, storageSet, toIso, todayIso } from '../../core/config';
 import { I18N_PIPES, I18nService } from '../../core/i18n/i18n.service';
 import { Account, Category, Transaction, TransactionSave, TransactionType, User } from '../../core/models';
 import { Icon } from '../../shared/ui';
 
 const LAST_ACCOUNT_KEY = 'mf.lastAccount';
+/** Most entries one multi-day save may create. */
+const MAX_DAYS = 62;
 
 @Component({
   selector: 'app-transaction-form',
@@ -49,6 +51,18 @@ export class TransactionFormPage implements OnInit {
     memberId: null as string | null,
     note: '',
   };
+
+  // Multi-day: the same entry saved once per day from form.date to toDate (new entries only).
+  protected readonly multiDay = signal(false);
+  protected toDate = todayIso();
+  /** Weekdays (0 = Sunday … 6 = Saturday) left out of the range, e.g. Friday. */
+  protected readonly skip = signal<ReadonlySet<number>>(new Set());
+  /** Weekday buttons in Bangladesh order (Saturday first), labelled in the current language. */
+  protected readonly weekdays = computed(() => {
+    const fmt = new Intl.DateTimeFormat(this.i18n.locale(), { weekday: 'short' });
+    // 1 Nov 2026 is a Sunday, so 1 + day gives a date on that weekday.
+    return [6, 0, 1, 2, 3, 4, 5].map((day) => ({ day, label: fmt.format(new Date(2026, 10, 1 + day)) }));
+  });
 
   /** Active items, plus whatever an existing entry already points at (even if since deactivated). */
   protected readonly accounts = computed(() => {
@@ -116,6 +130,32 @@ export class TransactionFormPage implements OnInit {
     this.form.memberId = this.auth.user()?.id ?? null;
   }
 
+  protected setMultiDay(on: boolean): void {
+    this.multiDay.set(on);
+    this.error.set('');
+    if (on && this.toDate < this.form.date) this.toDate = this.form.date;
+  }
+
+  protected toggleSkip(day: number): void {
+    const next = new Set(this.skip());
+    if (next.has(day)) next.delete(day);
+    else next.add(day);
+    this.skip.set(next);
+  }
+
+  /** Every date (yyyy-MM-dd) from the start to the end date, minus skipped weekdays. Capped to avoid runaway loops. */
+  protected rangeDates(): string[] {
+    const [fy, fm, fd] = this.form.date.split('-').map(Number);
+    const [ty, tm, td] = (this.toDate || '').split('-').map(Number);
+    if (!fy || !ty) return [];
+    const end = new Date(ty, tm - 1, td);
+    const dates: string[] = [];
+    for (let d = new Date(fy, fm - 1, fd), i = 0; d <= end && i < 400; d.setDate(d.getDate() + 1), i++) {
+      if (!this.skip().has(d.getDay())) dates.push(toIso(d));
+    }
+    return dates;
+  }
+
   protected setType(t: TransactionType): void {
     if (t === this.type()) return;
     this.type.set(t);
@@ -145,10 +185,20 @@ export class TransactionFormPage implements OnInit {
       note: f.note.trim() || null,
     };
 
+    const id = this.id();
+    let req$: Observable<unknown>;
+    if (!id && this.multiDay()) {
+      if (this.toDate < f.date) return this.error.set(this.i18n.t('tx.badRange'));
+      const dates = this.rangeDates();
+      if (!dates.length) return this.error.set(this.i18n.t('tx.noDays'));
+      if (dates.length > MAX_DAYS) return this.error.set(this.i18n.t('tx.tooManyDays', { n: MAX_DAYS }));
+      req$ = this.api.createTransactions(dates.map((date) => ({ ...body, date })));
+    } else {
+      req$ = id ? this.api.updateTransaction(id, body) : this.api.createTransaction(body);
+    }
+
     this.busy.set(true);
     this.error.set('');
-    const id = this.id();
-    const req$ = id ? this.api.updateTransaction(id, body) : this.api.createTransaction(body);
     req$.subscribe({
       next: () => {
         storageSet(LAST_ACCOUNT_KEY, String(body.accountId));
