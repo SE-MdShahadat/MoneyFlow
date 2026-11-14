@@ -25,6 +25,9 @@ const ICONS: Record<string, string> = {
   in: '<path d="M17 7 7 17M17 17H7V7"/>',
   out: '<path d="M7 17 17 7M7 7h10v10"/>',
   swap: '<path d="m7 4-4 4 4 4M3 8h18M17 20l4-4-4-4M21 16H3"/>',
+  report: '<path d="M3 3v18h18"/><path d="M8 17v-5M13 17V8M18 17v-8"/>',
+  file: '<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M9 14h6M9 17h4"/>',
+  download: '<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>',
 };
 
 @Component({

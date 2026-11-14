@@ -235,6 +235,67 @@ export class ApiService {
     );
   }
 
+  // ---------- Reports ----------
+  /**
+   * Every entry between two dates (inclusive), oldest first, read in pages of 1000
+   * (the most Supabase returns per request).
+   */
+  reportTransactions(q: Omit<TransactionQuery, 'page' | 'pageSize'>): Observable<Transaction[]> {
+    const filters = {
+      p_from: q.from,
+      p_to: q.to,
+      p_type: q.type ?? null,
+      p_account: q.accountId ?? null,
+      p_member: q.memberId ?? null,
+      p_search: q.search?.trim() || null,
+    };
+    const chunk = 1000;
+    return from(
+      (async () => {
+        const all: Transaction[] = [];
+        for (let offset = 0; ; offset += chunk) {
+          const rows = (await unwrap(
+            db()
+              .rpc('filtered_transactions', filters)
+              .order('date', { ascending: true })
+              .order('id', { ascending: true })
+              .range(offset, offset + chunk - 1),
+          )) as Record<string, unknown>[];
+          all.push(...rows.map(toTransaction));
+          if (rows.length < chunk) return all;
+        }
+      })(),
+    );
+  }
+
+  /**
+   * Total of all accounts at the start of `date` (before that day's entries):
+   * today's total minus everything (income − expense) dated on or after it.
+   */
+  openingBalance(date: string): Observable<number> {
+    return from(
+      (async () => {
+        const [accounts, summary] = await Promise.all([
+          unwrap(db().from('account_balances').select('balance')),
+          unwrap(db().rpc('transaction_summary', { p_from: date, p_to: '9999-12-31' })),
+        ]);
+        const now = (accounts as { balance: number }[]).reduce((sum, a) => sum + Number(a.balance ?? 0), 0);
+        const s = (summary as { income: number; expense: number }[])[0];
+        return now - (Number(s?.income ?? 0) - Number(s?.expense ?? 0));
+      })(),
+    );
+  }
+
+  /** Year of the oldest entry, or null when there are none. */
+  firstTransactionYear(): Observable<number | null> {
+    return from(
+      unwrap(db().from('transactions').select('date').order('date', { ascending: true }).limit(1)).then((rows) => {
+        const d = (rows as { date: string }[] | null)?.[0]?.date;
+        return d ? Number(d.slice(0, 4)) : null;
+      }),
+    );
+  }
+
   // ---------- Dashboard ----------
   dashboard(year: number, month: number): Observable<Dashboard> {
     return from(

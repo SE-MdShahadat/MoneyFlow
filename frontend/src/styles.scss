@@ -788,3 +788,51 @@ button {
     animation: none;
   }
 }
+
+/* ============ Print (used for PDF reports) ============ */
+@page {
+  size: A4;
+  margin: 12mm 10mm;
+}
+@media print {
+  :root {
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #eef2f6;
+    --text: #0f172a;
+    --muted: #475569;
+    --border: #cbd5e1;
+    --primary: #0f766e;
+    --on-primary: #ffffff;
+    --income: #15803d;
+    --expense: #b91c1c;
+    --shadow: none;
+    color-scheme: light;
+  }
+  html,
+  body {
+    background: #fff;
+    font-size: 11px;
+  }
+  .sidebar,
+  .topbar,
+  .bottomnav,
+  .no-print {
+    display: none !important;
+  }
+  .shell {
+    display: block !important;
+    min-height: 0;
+  }
+  .content {
+    max-width: none;
+    padding: 0 !important;
+  }
+  .card {
+    box-shadow: none;
+  }
+  .brand-mark {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

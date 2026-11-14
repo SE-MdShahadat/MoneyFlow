@@ -1,0 +1,157 @@
+<div class="page-head no-print">
+  <h1>{{ 'nav.reports' | t }}</h1>
+  <div class="export">
+    <button type="button" class="btn btn-ghost btn-sm" (click)="exportPdf()" [disabled]="!report() || loading()">
+      <app-icon name="file" [size]="14" /> PDF
+    </button>
+    <button type="button" class="btn btn-ghost btn-sm" (click)="exportExcel()" [disabled]="!report() || loading()">
+      <app-icon name="download" [size]="14" /> Excel
+    </button>
+  </div>
+</div>
+
+<div class="card filters no-print">
+  <div class="seg kinds" role="tablist">
+    @for (k of kinds; track k) {
+      <button type="button" role="tab" [class.on]="kind() === k" [attr.aria-selected]="kind() === k" (click)="kind.set(k)">
+        {{ kindLabel(k) }}
+      </button>
+    }
+  </div>
+
+  <div class="filter-grid">
+    @switch (kind()) {
+      @case ('monthly') {
+        <label class="field">
+          <span class="field-label">{{ 'rep.year' | t }}</span>
+          <select [ngModel]="year()" (ngModelChange)="year.set(+$event)">
+            @for (y of years(); track y) {
+              <option [ngValue]="y">{{ y }}</option>
+            }
+          </select>
+        </label>
+      }
+      @case ('yearly') {
+        <label class="field">
+          <span class="field-label">{{ 'rep.fromYear' | t }}</span>
+          <select [ngModel]="fromYear()" (ngModelChange)="fromYear.set(+$event)">
+            @for (y of years(); track y) {
+              <option [ngValue]="y">{{ y }}</option>
+            }
+          </select>
+        </label>
+        <label class="field">
+          <span class="field-label">{{ 'rep.toYear' | t }}</span>
+          <select [ngModel]="toYear()" (ngModelChange)="toYear.set(+$event)">
+            @for (y of years(); track y) {
+              <option [ngValue]="y">{{ y }}</option>
+            }
+          </select>
+        </label>
+      }
+      @default {
+        <label class="field">
+          <span class="field-label">{{ 'rep.from' | t }}</span>
+          <input type="date" [ngModel]="from()" (ngModelChange)="from.set($event)" />
+        </label>
+        <label class="field">
+          <span class="field-label">{{ 'rep.to' | t }}</span>
+          <input type="date" [ngModel]="to()" (ngModelChange)="to.set($event)" />
+        </label>
+        @if (kind() === 'range') {
+          <label class="field">
+            <span class="field-label">{{ 'field.type' | t }}</span>
+            <select [ngModel]="type()" (ngModelChange)="type.set($event)">
+              @for (ty of types; track ty) {
+                <option [ngValue]="ty">{{ typeLabel(ty) }}</option>
+              }
+            </select>
+          </label>
+          <label class="field">
+            <span class="field-label">{{ 'field.account' | t }}</span>
+            <select [ngModel]="accountId()" (ngModelChange)="accountId.set($event)">
+              <option [ngValue]="null">{{ 'field.allAccounts' | t }}</option>
+              @for (a of accounts(); track a.id) {
+                <option [ngValue]="a.id">{{ a.name }}</option>
+              }
+            </select>
+          </label>
+          <label class="field">
+            <span class="field-label">{{ 'field.member' | t }}</span>
+            <select [ngModel]="memberId()" (ngModelChange)="memberId.set($event)">
+              <option [ngValue]="null">{{ 'field.allMembers' | t }}</option>
+              @for (m of members(); track m.id) {
+                <option [ngValue]="m.id">{{ m.name }}</option>
+              }
+            </select>
+          </label>
+        }
+      }
+    }
+  </div>
+</div>
+
+@if (error()) {
+  <div class="alert alert-error no-print" role="alert">{{ error() }}</div>
+}
+
+@if (loading()) {
+  <p class="empty no-print">{{ 'common.loading' | t }}</p>
+} @else if (report(); as r) {
+  <article class="card report-doc">
+    <header class="doc-head">
+      <div class="doc-brand"><span class="brand-mark">৳</span> {{ 'app.name' | t }}</div>
+      <h2>{{ r.title }}</h2>
+      <p class="doc-period">{{ r.period }}</p>
+    </header>
+
+    <dl class="doc-summary">
+      @for (s of r.summary; track s.label) {
+        <div>
+          <dt>{{ s.label }}</dt>
+          <dd [class.expense]="s.value < 0">৳ {{ amount(s.value) }}</dd>
+        </div>
+      }
+    </dl>
+
+    <div class="table-wrap">
+      <table class="report-table" [class.wide]="r.kind === 'range'">
+        <thead>
+          <tr>
+            @for (c of r.cols; track $index) {
+              <th [class.num]="c.kind !== 'text'">{{ c.label }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of r.rows; track $index) {
+            <tr>
+              @for (v of row; track $index) {
+                <td [class.num]="r.cols[$index].kind !== 'text'" [class.expense]="r.cols[$index].kind === 'money' && +(v ?? 0) < 0">
+                  {{ cell(v, r.cols[$index].kind) }}
+                </td>
+              }
+            </tr>
+          } @empty {
+            <tr>
+              <td class="empty" [attr.colspan]="r.cols.length">{{ 'rep.empty' | t }}</td>
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr>
+            @for (v of r.total; track $index) {
+              <td [class.num]="r.cols[$index].kind !== 'text'">{{ cell(v, r.cols[$index].kind) }}</td>
+            }
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <p class="doc-note">{{ r.note }}</p>
+    <footer class="doc-foot">
+      <span>{{ r.generated }}</span>
+      <span class="sign">{{ 'rep.signature' | t }}</span>
+    </footer>
+  </article>
+}

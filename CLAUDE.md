@@ -29,6 +29,7 @@ No automated tests exist yet. Schema changes: edit `supabase/schema.sql` and app
 - RLS-blocked updates/deletes affect 0 rows without an error, so `ApiService` asks for the changed ids back (`changedOne`) and turns 0 into `FORBIDDEN`.
 - Account balances are computed in the `account_balances` view, never stored. Transfers have no category. Deleting an account/category that has entries only deactivates it (FK error 23503 → set `is_active = false`).
 - `dues` holds Receivable (owed to the family) / Payable (owed by the family) amounts per person; settled rows are not counted. `balance_summary()` returns account total, open receivable/payable and actual = balance + receivable − payable (shown on the Transactions page).
+- Reports (`pages/reports`): date-range list, date-wise, month-wise and year-wise summaries, built in the browser from `filtered_transactions` (read in pages of 1000) plus an opening balance. Excel export uses the dependency-free writer in `core/xlsx.ts`; PDF export uses the browser's print dialog ("Save as PDF") with print styles in `styles.scss`, because browser PDF libraries cannot shape Bangla text.
 - DB columns are snake_case; `core/mappers.ts` converts to the camelCase models. The `dashboard` RPC returns camelCase JSON directly (except `recent`, which is mapped).
 
 ## Conventions
