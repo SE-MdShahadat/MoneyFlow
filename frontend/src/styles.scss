@@ -686,6 +686,22 @@ button {
 .list-row.inactive {
   opacity: 1;
 }
+.due-total {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  text-align: left;
+  cursor: pointer;
+  strong {
+    font-size: 20px;
+  }
+}
+.due-total.on {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+
 .pending-badge {
   background: var(--expense-soft);
   color: var(--expense);

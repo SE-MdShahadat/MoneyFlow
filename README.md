@@ -22,7 +22,7 @@ Nothing needs to run on your own computer.
 
 ## Database
 
-- Schema, security rules and default categories: [`supabase/schema.sql`](supabase/schema.sql) (run once in Supabase → SQL Editor on a new project).
+- Schema, security rules and default categories: [`supabase/schema.sql`](supabase/schema.sql), then [`supabase/002_dues.sql`](supabase/002_dues.sql) (run once each, in order, in Supabase → SQL Editor on a new project).
 - See the data: Supabase dashboard → **Table Editor** or **SQL Editor**.
 - Connection string for other tools: Supabase dashboard → **Connect**.
 - Supabase's free plan pauses a project after about a week with no use; open the dashboard and press *Restore* if that happens.

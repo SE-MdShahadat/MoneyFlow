@@ -1,4 +1,4 @@
-import { Account, Category, Transaction, User } from './models';
+import { Account, Category, Due, Transaction, User } from './models';
 
 /* Database rows use snake_case; the app uses camelCase. These turn one into the other. */
 
@@ -38,6 +38,18 @@ export function toCategory(c: Row): Category {
     color: c['color'],
     sortOrder: c['sort_order'],
     isActive: !!c['is_active'],
+  };
+}
+
+export function toDue(d: Row): Due {
+  return {
+    id: d['id'],
+    kind: d['kind'],
+    person: d['person'],
+    amount: Number(d['amount'] ?? 0),
+    note: d['note'] ?? null,
+    isSettled: !!d['is_settled'],
+    createdById: d['created_by'],
   };
 }
 

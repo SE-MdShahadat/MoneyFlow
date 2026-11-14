@@ -1,10 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Observable, from } from 'rxjs';
 import { supabase } from './config';
-import { toAccount, toCategory, toTransaction, toUser } from './mappers';
+import { toAccount, toCategory, toDue, toTransaction, toUser } from './mappers';
 import {
   Account,
   AccountSave,
+  BalanceSummary,
+  Due,
+  DueSave,
   Category,
   CategorySave,
   CategoryType,
@@ -191,6 +194,42 @@ export class ApiService {
     );
   }
 
+  // ---------- Dues (Receivable / Payable) ----------
+  dues(): Observable<Due[]> {
+    return from(
+      unwrap(db().from('dues').select('*').order('is_settled').order('amount', { ascending: false })).then((rows) =>
+        (rows as Record<string, unknown>[]).map(toDue),
+      ),
+    );
+  }
+
+  createDue(body: DueSave): Observable<void> {
+    return from(unwrap(db().from('dues').insert(dueRow(body))).then(() => undefined));
+  }
+
+  updateDue(id: number, body: DueSave): Observable<void> {
+    return from(changedOne(db().from('dues').update(dueRow(body)).eq('id', id).select('id')));
+  }
+
+  deleteDue(id: number): Observable<void> {
+    return from(changedOne(db().from('dues').delete().eq('id', id).select('id')));
+  }
+
+  /** Account total, open receivables/payables and the "actual" balance (balance + receivable − payable). */
+  balanceSummary(): Observable<BalanceSummary> {
+    return from(
+      unwrap(db().rpc('balance_summary')).then((raw) => {
+        const s = (raw ?? {}) as Partial<BalanceSummary>;
+        return {
+          balance: Number(s.balance ?? 0),
+          receivable: Number(s.receivable ?? 0),
+          payable: Number(s.payable ?? 0),
+          actual: Number(s.actual ?? 0),
+        };
+      }),
+    );
+  }
+
   // ---------- Dashboard ----------
   dashboard(year: number, month: number): Observable<Dashboard> {
     return from(
@@ -221,6 +260,16 @@ function categoryRow(b: CategorySave) {
     color: b.color?.trim() || '#64748b',
     sort_order: Number(b.sortOrder) || 0,
     is_active: b.isActive,
+  };
+}
+
+function dueRow(b: DueSave) {
+  return {
+    kind: b.kind,
+    person: b.person.trim(),
+    amount: Math.round((Number(b.amount) || 0) * 100) / 100,
+    note: b.note?.trim() || null,
+    is_settled: b.isSettled,
   };
 }
 

@@ -9,7 +9,7 @@ MoneyFlow is a family finance tracker (income, expense, transfers between accoun
 ## Architecture
 
 - `frontend/`: Angular 20 (standalone components, signals, **zoneless**, hash routing), plain SCSS, no UI library. Deployed to GitHub Pages by `.github/workflows/deploy-pages.yml` on push to `main` (https://se-mdshahadat.github.io/MoneyFlow/).
-- `supabase/schema.sql`: the whole backend. Tables, Row Level Security policies, triggers, views and RPC functions on Supabase (PostgreSQL). There is no custom server; the browser talks to Supabase directly with `@supabase/supabase-js`.
+- `supabase/schema.sql` + numbered follow-ups (`002_dues.sql`, …, run in order on a new project): the whole backend. Tables, Row Level Security policies, triggers, views and RPC functions on Supabase (PostgreSQL). There is no custom server; the browser talks to Supabase directly with `@supabase/supabase-js`.
 - `frontend/public/config.js`: Supabase URL + publishable key, read at runtime (no rebuild to switch projects). The publishable key is public by design; security comes from RLS.
 
 ## Commands
@@ -28,6 +28,7 @@ No automated tests exist yet. Schema changes: edit `supabase/schema.sql` and app
 - Admin manages accounts, categories, members; Members read everything, add entries, edit/delete only their own (`created_by`, set by trigger). A trigger refuses to remove the last active admin.
 - RLS-blocked updates/deletes affect 0 rows without an error, so `ApiService` asks for the changed ids back (`changedOne`) and turns 0 into `FORBIDDEN`.
 - Account balances are computed in the `account_balances` view, never stored. Transfers have no category. Deleting an account/category that has entries only deactivates it (FK error 23503 → set `is_active = false`).
+- `dues` holds Receivable (owed to the family) / Payable (owed by the family) amounts per person; settled rows are not counted. `balance_summary()` returns account total, open receivable/payable and actual = balance + receivable − payable (shown on the Transactions page).
 - DB columns are snake_case; `core/mappers.ts` converts to the camelCase models. The `dashboard` RPC returns camelCase JSON directly (except `recent`, which is mapped).
 
 ## Conventions

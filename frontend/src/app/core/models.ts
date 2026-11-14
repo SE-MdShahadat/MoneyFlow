@@ -148,6 +148,28 @@ export interface Dashboard {
   recent: Transaction[];
 }
 
+export type DueKind = 'Receivable' | 'Payable';
+
+/** Money someone owes the family (Receivable) or the family owes someone (Payable). */
+export interface Due {
+  id: number;
+  kind: DueKind;
+  person: string;
+  amount: number;
+  note: string | null;
+  isSettled: boolean;
+  createdById: string;
+}
+
+export type DueSave = Omit<Due, 'id' | 'createdById'>;
+
+export interface BalanceSummary {
+  balance: number;
+  receivable: number;
+  payable: number;
+  actual: number;
+}
+
 export interface Period {
   year: number;
   month: number;

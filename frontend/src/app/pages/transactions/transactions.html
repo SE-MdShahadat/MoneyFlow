@@ -49,6 +49,28 @@
   </div>
 </div>
 
+@if (summary(); as s) {
+  <div class="totals totals-4">
+    <div class="card tot">
+      <span class="muted small" [title]="'sum.balanceHint' | t">{{ 'sum.balance' | t }}</span>
+      <strong [class.expense]="s.balance < 0">{{ s.balance | money }}</strong>
+    </div>
+    <a class="card tot" routerLink="/dues">
+      <span class="muted small">{{ 'sum.receivable' | t }}</span>
+      <strong class="income">{{ s.receivable | money }}</strong>
+    </a>
+    <a class="card tot" routerLink="/dues">
+      <span class="muted small">{{ 'sum.payable' | t }}</span>
+      <strong class="expense">{{ s.payable | money }}</strong>
+    </a>
+    <div class="card tot actual">
+      <span class="muted small" [title]="'sum.actualHint' | t">{{ 'sum.actual' | t }}</span>
+      <strong [class.expense]="s.actual < 0">{{ s.actual | money }}</strong>
+      <span class="hint-line">{{ 'sum.actualHint' | t }}</span>
+    </div>
+  </div>
+}
+
 @if (error()) {
   <div class="alert alert-error" role="alert">{{ error() }}</div>
 }

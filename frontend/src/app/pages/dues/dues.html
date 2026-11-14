@@ -1,0 +1,83 @@
+<div class="page-head">
+  <h1>{{ 'nav.dues' | t }}</h1>
+  <button type="button" class="btn btn-primary btn-sm" (click)="open('new')">
+    <app-icon name="plus" [size]="18" /> {{ 'due.add' | t }}
+  </button>
+</div>
+
+@if (error()) {
+  <div class="alert alert-error" role="alert">{{ error() }}</div>
+}
+
+<div class="stack">
+  <div class="row">
+    <button type="button" class="card due-total" [class.on]="tab() === 'Receivable'" (click)="tab.set('Receivable')">
+      <span class="muted small">{{ 'due.Receivable' | t }}</span>
+      <strong class="income">{{ receivable() | money }}</strong>
+    </button>
+    <button type="button" class="card due-total" [class.on]="tab() === 'Payable'" (click)="tab.set('Payable')">
+      <span class="muted small">{{ 'due.Payable' | t }}</span>
+      <strong class="expense">{{ payable() | money }}</strong>
+    </button>
+  </div>
+
+  <div class="card">
+    <div class="list">
+      @for (d of list(); track d.id) {
+        <button type="button" class="list-row as-button" [class.inactive]="d.isSettled" (click)="open(d)" [disabled]="!canEdit(d)">
+          <span class="avatar">{{ d.person.charAt(0).toUpperCase() }}</span>
+          <span class="grow">
+            <span class="title block">{{ d.person }}</span>
+            <span class="muted small">
+              {{ d.note ?? '' }}
+              @if (d.isSettled) { {{ d.note ? '·' : '' }} {{ 'due.settled' | t }} }
+            </span>
+          </span>
+          <strong [class.income]="d.kind === 'Receivable'" [class.expense]="d.kind === 'Payable'">{{ d.amount | money }}</strong>
+        </button>
+      } @empty {
+        @if (loaded()) {
+          <p class="empty">{{ 'due.empty' | t }}</p>
+        }
+      }
+    </div>
+  </div>
+
+  <p class="muted small">{{ 'due.hint' | t }}</p>
+</div>
+
+<app-modal [open]="editing() !== null" [title]="(editing() === 'new' ? 'due.add' : 'due.edit') | t" (closed)="editing.set(null)">
+  <form (ngSubmit)="save()">
+    <div class="seg" style="margin-bottom: 14px">
+      <button type="button" class="income" [class.on]="form.kind === 'Receivable'" (click)="form.kind = 'Receivable'">
+        {{ 'due.Receivable' | t }}
+      </button>
+      <button type="button" class="expense" [class.on]="form.kind === 'Payable'" (click)="form.kind = 'Payable'">
+        {{ 'due.Payable' | t }}
+      </button>
+    </div>
+    <div class="field">
+      <label for="due-person">{{ 'due.person' | t }}</label>
+      <input id="due-person" name="person" [(ngModel)]="form.person" required maxlength="100" />
+    </div>
+    <div class="field">
+      <label for="due-amount">{{ 'field.amount' | t }} (৳)</label>
+      <input id="due-amount" name="amount" type="number" inputmode="decimal" min="0" step="0.01" [(ngModel)]="form.amount" required />
+    </div>
+    <div class="field">
+      <label for="due-note">{{ 'field.note' | t }} <span class="muted">({{ 'field.optional' | t }})</span></label>
+      <input id="due-note" name="note" [(ngModel)]="form.note" maxlength="500" />
+    </div>
+    <label class="check"><input type="checkbox" name="isSettled" [(ngModel)]="form.isSettled" /> {{ 'due.settledLabel' | t }}</label>
+
+    @if (formError()) {
+      <div class="alert alert-error" role="alert">{{ formError() }}</div>
+    }
+    <div class="actions">
+      @if (editing() !== 'new') {
+        <button type="button" class="btn btn-danger" (click)="remove()" [disabled]="busy()">{{ 'action.delete' | t }}</button>
+      }
+      <button type="submit" class="btn btn-primary" [disabled]="busy()">{{ 'action.save' | t }}</button>
+    </div>
+  </form>
+</app-modal>

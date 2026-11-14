@@ -6,7 +6,7 @@ import { ApiService } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { monthRange } from '../../core/config';
 import { I18N_PIPES, I18nService } from '../../core/i18n/i18n.service';
-import { Account, Period, Transaction, TransactionQuery, TransactionType, User } from '../../core/models';
+import { Account, BalanceSummary, Period, Transaction, TransactionQuery, TransactionType, User } from '../../core/models';
 import { Icon, MonthPicker, TxItem, currentPeriod } from '../../shared/ui';
 
 const PAGE_SIZE = 50;
@@ -41,6 +41,8 @@ export class TransactionsPage {
   protected readonly error = signal('');
   /** Date whose entries are being deleted right now. */
   protected readonly deleting = signal<string | null>(null);
+  /** Balance / receivable / payable / actual balance (not limited to the selected month). */
+  protected readonly summary = signal<BalanceSummary | null>(null);
   private page = 1;
 
   protected readonly hasMore = computed(() => this.items().length < this.total());
@@ -70,6 +72,8 @@ export class TransactionsPage {
       error: (e) => this.error.set(this.i18n.error(e)),
     });
 
+    this.loadSummary();
+
     // Reload from page 1 whenever any filter changes.
     effect(() => {
       const query = this.query();
@@ -90,6 +94,13 @@ export class TransactionsPage {
       pageSize: PAGE_SIZE,
     };
   });
+
+  private loadSummary(): void {
+    this.api.balanceSummary().subscribe({
+      next: (s) => this.summary.set(s),
+      error: () => this.summary.set(null),
+    });
+  }
 
   protected loadMore(): void {
     this.load(this.query(), false);
@@ -130,6 +141,7 @@ export class TransactionsPage {
       next: () => {
         this.deleting.set(null);
         this.load(this.query(), true);
+        this.loadSummary();
       },
       error: (e) => {
         this.deleting.set(null);

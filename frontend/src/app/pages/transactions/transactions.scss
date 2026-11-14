@@ -52,6 +52,27 @@
   }
 }
 
+.totals-4 {
+  grid-template-columns: repeat(2, 1fr);
+  margin-top: 0;
+}
+a.tot:hover strong {
+  text-decoration: underline;
+}
+.tot.actual {
+  border-color: var(--primary);
+  strong {
+    color: var(--primary);
+  }
+}
+.tot.actual strong.expense {
+  color: var(--expense);
+}
+.hint-line {
+  font-size: 11px;
+  color: var(--muted);
+}
+
 .list-card {
   padding-top: 4px;
 }
@@ -101,6 +122,10 @@
   .totals {
     gap: 16px;
     margin: 16px 0;
+  }
+  .totals-4 {
+    grid-template-columns: repeat(4, 1fr);
+    margin-top: 0;
   }
   .tot {
     padding: 14px 18px;

@@ -23,6 +23,7 @@ export class Shell {
     { path: '/dashboard', label: 'nav.dashboard', icon: 'home' },
     { path: '/transactions', label: 'nav.transactions', icon: 'list' },
     { path: '/accounts', label: 'nav.accounts', icon: 'wallet' },
+    { path: '/dues', label: 'nav.dues', icon: 'swap' },
     { path: '/categories', label: 'nav.categories', icon: 'tag' },
     { path: '/members', label: 'nav.members', icon: 'users' },
     { path: '/settings', label: 'nav.settings', icon: 'settings' },
