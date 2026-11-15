@@ -10,6 +10,26 @@
   <div class="alert alert-error" role="alert">{{ error() }}</div>
 }
 
+<!-- Today's activity (always today, whatever month is selected) -->
+<div class="card today-card">
+  <div class="card-head">
+    <h2>{{ 'dash.today' | t }} <span class="muted small">· {{ todayDate | bdate }}</span></h2>
+    @if (today(); as td) {
+      <span class="today-tot small">
+        <span class="income">+{{ td.totalIncome | money }}</span>
+        <span class="expense">-{{ td.totalExpense | money }}</span>
+      </span>
+    }
+  </div>
+  <div class="list">
+    @for (tx of today()?.items ?? []; track tx.id) {
+      <app-tx-item [tx]="tx" />
+    } @empty {
+      <p class="empty">{{ today() ? ('dash.todayEmpty' | t) : ('common.loading' | t) }}</p>
+    }
+  </div>
+</div>
+
 @if (data(); as d) {
   <!-- Summary numbers -->
   <section class="stats">
@@ -135,26 +155,6 @@
             <app-tx-item [tx]="tx" [showDate]="true" />
           } @empty {
             <p class="empty">{{ 'empty.transactions' | t }}</p>
-          }
-        </div>
-      </div>
-
-      <!-- Today's activity (always today, whatever month is selected) -->
-      <div class="card">
-        <div class="card-head">
-          <h2>{{ 'dash.today' | t }} <span class="muted small">· {{ todayDate | bdate }}</span></h2>
-          @if (today(); as td) {
-            <span class="today-tot small">
-              <span class="income">+{{ td.totalIncome | money }}</span>
-              <span class="expense">-{{ td.totalExpense | money }}</span>
-            </span>
-          }
-        </div>
-        <div class="list">
-          @for (tx of today()?.items ?? []; track tx.id) {
-            <app-tx-item [tx]="tx" />
-          } @empty {
-            <p class="empty">{{ today() ? ('dash.todayEmpty' | t) : ('common.loading' | t) }}</p>
           }
         </div>
       </div>

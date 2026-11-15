@@ -291,6 +291,10 @@ a.stat:hover .value {
   }
 }
 
+.today-card {
+  min-width: 0;
+  margin: 0 0 10px;
+}
 .today-tot {
   display: flex;
   gap: 8px;
