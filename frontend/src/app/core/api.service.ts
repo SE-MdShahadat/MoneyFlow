@@ -81,7 +81,7 @@ export class ApiService {
   accounts(): Observable<Account[]> {
     return from(
       unwrap(db().from('account_balances').select('*').order('is_active', { ascending: false }).order('name')).then(
-        (rows) => (rows as Record<string, unknown>[]).map(toAccount),
+        (rows) => walletFirst((rows as Record<string, unknown>[]).map(toAccount)),
       ),
     );
   }
@@ -301,10 +301,16 @@ export class ApiService {
     return from(
       unwrap(db().rpc('dashboard', { p_year: year, p_month: month })).then((raw) => {
         const d = raw as Dashboard & { recent: Record<string, unknown>[] };
-        return { ...d, recent: d.recent.map(toTransaction) };
+        return { ...d, accounts: walletFirst(d.accounts), recent: d.recent.map(toTransaction) };
       }),
     );
   }
+}
+
+/** Keeps the order but moves the "Wallet" account(s) to the front; inactive accounts stay last. */
+function walletFirst<T extends { name: string; isActive?: boolean }>(list: T[]): T[] {
+  const rank = (a: T) => (a.isActive === false ? 2 : /wallet|ওয়ালেট/i.test(a.name) ? 0 : 1);
+  return list.map((a, i) => ({ a, i })).sort((x, y) => rank(x.a) - rank(y.a) || x.i - y.i).map((x) => x.a);
 }
 
 function accountRow(b: AccountSave) {
