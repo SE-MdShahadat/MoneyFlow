@@ -6,19 +6,36 @@
   margin: 0;
 }
 
-/* 6-col grid: account balance | actual balance on the first row, income | expense | saved on the second. */
+/* Balances: 2 cards in a row. Month numbers + dues: 5 compact cards in one row. */
 .stats {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 6px;
+}
+.bal-stats {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 10px 0;
+}
+.row-stats {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+  margin-top: 10px;
   > .stat {
-    grid-column: span 2;
-  }
-  > .stat.hero {
-    grid-column: 1 / -1;
-  }
-  > .stat.bal {
-    grid-column: span 3;
+    padding: 6px 5px;
+    .label {
+      gap: 3px;
+      font-size: 9.5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: block;
+    }
+    .label .dot {
+      margin-right: 3px;
+      vertical-align: middle;
+    }
+    .value {
+      font-size: 11px;
+    }
   }
 }
 .stat.bal .value {
@@ -75,13 +92,6 @@
   }
 }
 
-.dues-stats {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin-top: 6px;
-  > .stat {
-    grid-column: auto;
-  }
-}
 a.stat:hover .value {
   text-decoration: underline;
 }
@@ -265,9 +275,17 @@ a.stat:hover .value {
       font-size: 16px;
     }
   }
-  .dues-stats {
-    grid-template-columns: repeat(2, 1fr);
-    margin-top: 10px;
+  .row-stats {
+    gap: 10px;
+    > .stat {
+      padding: 9px 12px;
+      .label {
+        font-size: 10.5px;
+      }
+      .value {
+        font-size: 16px;
+      }
+    }
   }
   .stat.hero {
     grid-column: auto;
@@ -293,7 +311,7 @@ a.stat:hover .value {
 
 .today-card {
   min-width: 0;
-  margin: 0 0 10px;
+  margin: 0;
 }
 .today-tot {
   display: flex;
