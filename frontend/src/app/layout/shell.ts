@@ -1,5 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { APP_INFO } from '../core/app-info';
 import { AuthService } from '../core/auth.service';
 import { I18nService, TPipe } from '../core/i18n/i18n.service';
 import { Icon, ThemeToggle } from '../shared/ui';
@@ -32,5 +33,9 @@ export class Shell {
 
   /** Label for the language button: shows the language you would switch to. */
   protected readonly otherLang = computed(() => (this.i18n.lang() === 'bn' ? 'English' : 'বাংলা'));
-  protected readonly initial = computed(() => (this.auth.user()?.name ?? '?').trim().charAt(0).toUpperCase());
+  /** © 2026 MoneyFlow · Developed by PeopleSync Technologies Ltd. · v1.0.0 (same line as FuelSync). */
+  protected readonly footer = computed(
+    () => `© ${APP_INFO.year} ${APP_INFO.name} · ${this.i18n.t('app.developedBy')} ${APP_INFO.developer} · v${APP_INFO.version}`,
+  );
+  protected readonly initial =computed(() => (this.auth.user()?.name ?? '?').trim().charAt(0).toUpperCase());
 }

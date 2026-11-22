@@ -129,15 +129,12 @@ button {
   font-weight: 700;
   font-size: 15px;
 }
+/* App logo (PeopleSync mark, same as FuelSync). */
 .brand-mark {
-  display: grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 7px;
-  background: var(--primary);
-  color: var(--on-primary);
-  font-size: 15px;
+  display: block;
+  width: auto;
+  height: 28px;
+  object-fit: contain;
 }
 
 .sidebar {
@@ -204,21 +201,38 @@ button {
   width: 100%;
   max-width: 1100px;
   margin: 0 auto;
-  padding: 2px 12px calc(76px + env(safe-area-inset-bottom));
+  padding: 2px 12px calc(90px + env(safe-area-inset-bottom));
 }
 
-.bottomnav {
+/* Phone: fixed bottom bar = tab bar + footer line. */
+.bottombar {
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
   z-index: 30;
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  align-items: end;
   background: var(--surface);
   border-top: 1px solid var(--border);
   padding-bottom: env(safe-area-inset-bottom);
+}
+.app-footer {
+  padding: 0 8px 3px;
+  text-align: center;
+  font-size: 9.5px;
+  line-height: 13px;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.app-footer.desktop {
+  display: none;
+}
+.bottomnav {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: end;
 
   a {
     display: flex;
@@ -253,8 +267,22 @@ button {
     grid-template-columns: 196px 1fr;
   }
   .topbar,
-  .bottomnav {
+  .bottombar {
     display: none;
+  }
+  .main {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+    min-width: 0;
+  }
+  .main > .content {
+    flex: 1;
+  }
+  .app-footer.desktop {
+    display: block;
+    padding: 6px 12px 10px;
+    font-size: 10.5px;
   }
   .sidebar {
     position: sticky;

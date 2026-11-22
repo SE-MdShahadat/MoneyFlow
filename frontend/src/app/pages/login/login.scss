@@ -48,10 +48,7 @@
 }
 
 .brand-mark.big {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  font-size: 24px;
+  height: 56px;
   margin: 0 auto;
 }
 
@@ -65,9 +62,12 @@
     background: linear-gradient(140deg, #0f766e, #134e4a);
     color: #fff;
     text-align: center;
+    /* White tile so the blue / green logo stays visible on the teal panel. */
     .brand-mark {
-      background: rgba(255, 255, 255, 0.16);
-      color: #fff;
+      height: 84px;
+      padding: 10px;
+      border-radius: 18px;
+      background: #fff;
     }
     h1 {
       font-size: 24px;

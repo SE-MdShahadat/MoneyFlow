@@ -2,7 +2,7 @@
   <!-- Laptop / desktop: left sidebar -->
   <aside class="sidebar">
     <a class="brand" routerLink="/dashboard">
-      <span class="brand-mark">৳</span>
+      <img class="brand-mark" src="brand/logo-mark.png" alt="" />
       <span>{{ 'app.name' | t }}</span>
     </a>
 
@@ -43,7 +43,7 @@
     <!-- Phone: top bar -->
     <header class="topbar">
       <a class="brand" routerLink="/dashboard">
-        <span class="brand-mark">৳</span>
+        <img class="brand-mark" src="brand/logo-mark.png" alt="" />
         <span>{{ 'app.name' | t }}</span>
       </a>
       <div class="top-prefs">
@@ -57,9 +57,11 @@
     <main class="content">
       <router-outlet />
     </main>
+    <div class="app-footer desktop">{{ footer() }}</div>
   </div>
 
-  <!-- Phone: bottom tab bar, like a mobile app -->
+  <!-- Phone: bottom tab bar, like a mobile app, with the footer line under it -->
+  <div class="bottombar">
   <nav class="bottomnav">
     <a routerLink="/dashboard" routerLinkActive="active">
       <app-icon name="home" /><span>{{ 'nav.home' | t }}</span>
@@ -77,4 +79,6 @@
       <app-icon name="more" /><span>{{ 'nav.more' | t }}</span>
     </a>
   </nav>
+  <div class="app-footer">{{ footer() }}</div>
+  </div>
 </div>
