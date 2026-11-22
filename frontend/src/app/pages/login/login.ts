@@ -4,11 +4,11 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 import { I18nService, TPipe } from '../../core/i18n/i18n.service';
 import { User } from '../../core/models';
-import { Icon } from '../../shared/ui';
+import { Icon, ThemeToggle } from '../../shared/ui';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule, TPipe, Icon],
+  imports: [FormsModule, TPipe, Icon, ThemeToggle],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })

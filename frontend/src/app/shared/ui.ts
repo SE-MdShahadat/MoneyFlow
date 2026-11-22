@@ -3,6 +3,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 import { I18nService, MoneyPipe, TPipe } from '../core/i18n/i18n.service';
 import { toIso } from '../core/config';
+import { ThemeService } from '../core/theme.service';
 import { Period, Transaction } from '../core/models';
 
 // Static, hand-written SVG paths (24×24, stroke icons). Trusted constants, never user input.
@@ -29,7 +30,9 @@ const ICONS: Record<string, string> = {
   report: '<path d="M3 3v18h18"/><path d="M8 17v-5M13 17V8M18 17v-8"/>',
   file: '<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M9 14h6M9 17h4"/>',
   download: '<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>',
-  calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  moon: '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>',
+  calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
 };
 
 @Component({
@@ -109,6 +112,22 @@ export class MonthPicker {
     const d = new Date(p.year, p.month - 1 + delta, 1);
     this.period.set({ year: d.getFullYear(), month: d.getMonth() + 1 });
   }
+}
+
+/** Sun / moon button that switches light and dark; sits next to the language button. */
+@Component({
+  selector: 'app-theme-toggle',
+  imports: [Icon, TPipe],
+  template: `
+    @let dark = theme.theme() === 'dark';
+    <button type="button" class="theme-toggle" (click)="theme.toggle()"
+            [attr.aria-label]="(dark ? 'theme.toLight' : 'theme.toDark') | t" [title]="(dark ? 'theme.toLight' : 'theme.toDark') | t">
+      <app-icon [name]="dark ? 'sun' : 'moon'" [size]="15" />
+    </button>
+  `,
+})
+export class ThemeToggle {
+  protected readonly theme = inject(ThemeService);
 }
 
 export type RangeMode = 'day' | 'month' | 'year';

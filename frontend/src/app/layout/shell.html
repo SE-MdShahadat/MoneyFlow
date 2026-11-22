@@ -20,9 +20,12 @@
     </nav>
 
     <div class="side-foot">
-      <button type="button" class="btn btn-ghost btn-block" (click)="i18n.toggle()">
-        <app-icon name="globe" [size]="15" /> {{ otherLang() }}
-      </button>
+      <div class="side-prefs">
+        <button type="button" class="btn btn-ghost btn-block" (click)="i18n.toggle()">
+          <app-icon name="globe" [size]="15" /> {{ otherLang() }}
+        </button>
+        <app-theme-toggle />
+      </div>
       <div class="side-user">
         <span class="avatar">{{ initial() }}</span>
         <span class="side-user-name">
@@ -43,9 +46,12 @@
         <span class="brand-mark">৳</span>
         <span>{{ 'app.name' | t }}</span>
       </a>
-      <button type="button" class="lang-pill" (click)="i18n.toggle()">
-        <app-icon name="globe" [size]="13" /> {{ otherLang() }}
-      </button>
+      <div class="top-prefs">
+        <app-theme-toggle />
+        <button type="button" class="lang-pill" (click)="i18n.toggle()">
+          <app-icon name="globe" [size]="13" /> {{ otherLang() }}
+        </button>
+      </div>
     </header>
 
     <main class="content">

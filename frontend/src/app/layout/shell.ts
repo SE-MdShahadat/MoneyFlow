@@ -2,7 +2,7 @@ import { Component, computed, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../core/auth.service';
 import { I18nService, TPipe } from '../core/i18n/i18n.service';
-import { Icon } from '../shared/ui';
+import { Icon, ThemeToggle } from '../shared/ui';
 
 interface NavItem {
   path: string;
@@ -12,7 +12,7 @@ interface NavItem {
 
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, Icon, TPipe],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, Icon, ThemeToggle, TPipe],
   templateUrl: './shell.html',
 })
 export class Shell {

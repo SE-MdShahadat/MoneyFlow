@@ -23,27 +23,34 @@
   color-scheme: light;
 }
 
+/* Dark: follows the phone / laptop setting until the user picks one with the toggle (data-theme on <html>). */
+@mixin dark-tokens {
+  --bg: #0b1220;
+  --surface: #111a2b;
+  --surface-2: #1a2539;
+  --text: #e5e9f0;
+  --muted: #94a3b8;
+  --border: #22304a;
+  --primary: #2dd4bf;
+  --primary-strong: #14b8a6;
+  --primary-soft: rgba(45, 212, 191, 0.14);
+  --on-primary: #042f2e;
+  --income: #4ade80;
+  --income-soft: rgba(74, 222, 128, 0.14);
+  --expense: #f87171;
+  --expense-soft: rgba(248, 113, 113, 0.14);
+  --transfer: #60a5fa;
+  --transfer-soft: rgba(96, 165, 250, 0.14);
+  --shadow: none;
+  color-scheme: dark;
+}
 @media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0b1220;
-    --surface: #111a2b;
-    --surface-2: #1a2539;
-    --text: #e5e9f0;
-    --muted: #94a3b8;
-    --border: #22304a;
-    --primary: #2dd4bf;
-    --primary-strong: #14b8a6;
-    --primary-soft: rgba(45, 212, 191, 0.14);
-    --on-primary: #042f2e;
-    --income: #4ade80;
-    --income-soft: rgba(74, 222, 128, 0.14);
-    --expense: #f87171;
-    --expense-soft: rgba(248, 113, 113, 0.14);
-    --transfer: #60a5fa;
-    --transfer-soft: rgba(96, 165, 250, 0.14);
-    --shadow: none;
-    color-scheme: dark;
+  :root:not([data-theme='light']) {
+    @include dark-tokens;
   }
+}
+:root[data-theme='dark'] {
+  @include dark-tokens;
 }
 
 /* ============ Base ============ */
@@ -159,6 +166,38 @@ button {
   background: var(--surface);
   font-size: 11.5px;
   font-weight: 600;
+}
+
+/* Theme toggle sits next to the language button (top bar, login page, sidebar). */
+.top-prefs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.side-prefs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  .theme-toggle {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+  }
+}
+.theme-toggle {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 26px;
+  padding: 0;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+.theme-toggle:hover {
+  background: var(--surface-2);
 }
 
 .content {
@@ -880,7 +919,10 @@ button {
   margin: 12mm 10mm;
 }
 @media print {
-  :root {
+  :root,
+  :root[data-theme],
+  :root:not([data-theme='light']) {
+    color-scheme: light;
     --bg: #ffffff;
     --surface: #ffffff;
     --surface-2: #eef2f6;
