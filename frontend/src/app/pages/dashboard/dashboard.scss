@@ -1,9 +1,33 @@
+/* Every block on the page sits 6px from the next (no per-section margins). */
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  > * {
+    margin: 0 !important;
+  }
+  .card {
+    padding-block: 8px;
+  }
+  .card-head {
+    margin-bottom: 4px;
+  }
+  .stack {
+    gap: 6px;
+  }
+  p.empty {
+    padding: 8px 10px;
+  }
+}
 .grow {
   flex: 1;
   min-width: 0;
 }
 .greet {
   margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Balances: 2 cards in a row. Month numbers + dues: 5 compact cards in one row. */
@@ -116,45 +140,61 @@ a.stat:hover .value {
   margin-top: 12px;
 }
 
-.acc-strip {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  padding-bottom: 2px;
-  margin: 0 -12px;
-  padding-inline: 12px;
-  scrollbar-width: none;
-}
+/* Accounts: one compact line each (icon · name · balance). */
 .acc-card {
-  flex: 0 0 118px;
-  scroll-snap-align: start;
+  margin: 0;
+  /* Period numbers above the list, balances below it, all inside this card. */
+  .row-stats {
+    margin: 0 0 6px;
+  }
+  .bal-stats {
+    margin: 6px 0 0;
+  }
+  .stat {
+    box-shadow: none;
+  }
+}
+.acc-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: 16px;
+}
+.acc-row {
   display: flex;
-  flex-direction: column;
-  gap: 1px;
-  padding: 7px 9px;
-  margin: 0 !important;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 2px;
+  border-bottom: 1px solid var(--border);
+  min-width: 0;
+}
+.acc-row:last-child {
+  border-bottom: 0;
 }
 .acc-icon {
-  font-size: 15px;
+  flex: none;
+  width: 20px;
+  text-align: center;
+  font-size: 13px;
 }
 .acc-name {
-  font-size: 11px;
-  color: var(--muted);
+  flex: 1;
+  min-width: 0;
+  font-size: 12.5px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .acc-bal {
   font-weight: 700;
-  font-size: 13px;
+  font-size: 12.5px;
+  white-space: nowrap;
 }
 
 /* minmax(0, 1fr) + min-width: 0 stop long text (notes, names) from widening the cards past the screen. */
 .dash-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 10px;
+  gap: 6px;
   > .stack,
   .card {
     min-width: 0;
@@ -201,6 +241,44 @@ a.stat:hover .value {
 .bar-amt {
   font-weight: 600;
   white-space: nowrap;
+}
+/* One line per row: icon · name · bar · amount, bars lined up in one column. */
+.inline-bars {
+  .bar-row {
+    gap: 6px;
+    padding: 2px 0;
+  }
+  .bar-icon,
+  .avatar.sm {
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+  }
+  .bar-icon {
+    font-size: 11px;
+  }
+  .bar-body {
+    display: grid;
+    grid-template-columns: minmax(0, 36%) minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 8px;
+  }
+  .bar-top {
+    display: contents;
+  }
+  .bar-top > span:first-child {
+    grid-column: 1;
+  }
+  .bar {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .bar-amt {
+    grid-column: 3;
+    min-width: 58px;
+    text-align: right;
+    font-size: 12px;
+  }
 }
 .bar {
   height: 5px;
@@ -276,7 +354,7 @@ a.stat:hover .value {
     }
   }
   .row-stats {
-    gap: 10px;
+    gap: 8px;
     > .stat {
       padding: 9px 12px;
       .label {
@@ -293,12 +371,11 @@ a.stat:hover .value {
       font-size: 19px;
     }
   }
-  .acc-strip {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    overflow: visible;
-    margin: 0;
-    padding: 0;
+  .acc-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .acc-row:nth-last-child(2):nth-child(odd) {
+    border-bottom: 0;
   }
   .dash-grid {
     grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
@@ -319,4 +396,41 @@ a.stat:hover .value {
   font-weight: 600;
   white-space: nowrap;
 }
-
+/* Title + count and totals in one row. */
+.day-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  padding: 0; /* a global .day-head (Transactions page) adds padding */
+  margin-bottom: 4px;
+  h2 {
+    margin: 0;
+    white-space: nowrap;
+  }
+  .today-tot {
+    margin-left: auto;
+    gap: 6px;
+  }
+}
+.act-count {
+  font-weight: 500;
+}
+/* ‹ 1–10 / 57 › under the activity list */
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+  margin-top: 2px;
+  .icon-btn {
+    width: 26px;
+    height: 24px;
+  }
+  .icon-btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+}

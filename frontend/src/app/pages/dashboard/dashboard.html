@@ -3,24 +3,91 @@
     <p class="muted small greet">{{ 'dash.greeting' | t: { name: auth.user()?.name ?? '' } }}</p>
     <h1>{{ 'nav.dashboard' | t }}</h1>
   </div>
-  <app-month-picker [(period)]="period" />
+  <app-range-picker [(range)]="range" />
 </div>
 
 @if (error()) {
   <div class="alert alert-error" role="alert">{{ error() }}</div>
 }
 
+<!-- Day activity: today by default, any day can be picked (independent of the selected month) -->
+<div class="card today-card">
+  <div class="day-head">
+    <h2>
+      {{ (isToday() ? 'dash.today' : 'dash.dayActivity') | t }}
+      @if (activity(); as a) {
+        <span class="muted small act-count">({{ a.total | num }})</span>
+      }
+    </h2>
+    @if (activity(); as a) {
+      <span class="today-tot small">
+        <span class="income">+{{ a.totalIncome | money }}</span>
+        <span class="expense">-{{ a.totalExpense | money }}</span>
+      </span>
+    }
+  </div>
+  <div class="list">
+    @for (tx of activity()?.items ?? []; track tx.id) {
+      <app-tx-item [tx]="tx" [compact]="true" [showDate]="range().mode !== 'day'" />
+    } @empty {
+      <p class="empty">{{ activity() ? ((isToday() ? 'dash.todayEmpty' : 'dash.rangeEmpty') | t) : ('common.loading' | t) }}</p>
+    }
+  </div>
+  @if (actPages() > 1) {
+    <div class="pager">
+      <button type="button" class="icon-btn" (click)="goActPage(-1)" [disabled]="actPage() === 1" [attr.aria-label]="'action.prev' | t">
+        <app-icon name="chevron-left" />
+      </button>
+      <span class="small muted">
+        {{ (actPage() - 1) * actPageSize + 1 | num }}–{{ ((actPage() * actPageSize) < activity()!.total ? actPage() * actPageSize : activity()!.total) | num }}
+        / {{ activity()!.total | num }}
+      </span>
+      <button type="button" class="icon-btn" (click)="goActPage(1)" [disabled]="actPage() === actPages()" [attr.aria-label]="'action.next' | t">
+        <app-icon name="chevron-right" />
+      </button>
+    </div>
+  }
+</div>
+
 @if (data(); as d) {
   <!-- Accounts -->
-  <section>
+  <section class="card acc-card">
     <div class="card-head">
       <h2>{{ 'dash.accounts' | t }}</h2>
       <a routerLink="/accounts">{{ 'dash.seeAll' | t }}</a>
     </div>
+    <!-- Selected period numbers + open receivable / payable -->
+    <section class="stats row-stats">
+      <div class="stat card">
+        <span class="label"><span class="dot income-bg"></span>{{ 'dash.income' | t }}</span>
+        <span class="value income">{{ d.income | money }}</span>
+      </div>
+      <div class="stat card">
+        <span class="label"><span class="dot expense-bg"></span>{{ 'dash.expense' | t }}</span>
+        <span class="value expense">{{ d.expense | money }}</span>
+      </div>
+      <div class="stat card">
+        <span class="label"><span class="dot primary-bg"></span>{{ 'dash.net' | t }}</span>
+        <span class="value" [class.expense]="d.net < 0">{{ d.net | money: true }}</span>
+        @if (savingsRate() !== null) {
+          <span class="muted hint">{{ savingsRate()! | num }}%</span>
+        }
+      </div>
+      @if (summary(); as s) {
+        <a class="stat card" routerLink="/dues">
+          <span class="label"><span class="dot income-bg"></span>{{ 'sum.receivable' | t }}</span>
+          <span class="value income">{{ s.receivable | money }}</span>
+        </a>
+        <a class="stat card" routerLink="/dues">
+          <span class="label"><span class="dot expense-bg"></span>{{ 'sum.payable' | t }}</span>
+          <span class="value expense">{{ s.payable | money }}</span>
+        </a>
+      }
+    </section>
     @if (d.accounts.length) {
-      <div class="acc-strip">
+      <div class="acc-list">
         @for (a of d.accounts; track a.id) {
-          <div class="acc-card card">
+          <div class="acc-row">
             <span class="acc-icon">{{ accountIcons[a.type] }}</span>
             <span class="acc-name">{{ a.name }}</span>
             <span class="acc-bal" [class.expense]="a.balance < 0">{{ a.balance | money }}</span>
@@ -28,81 +95,29 @@
         }
       </div>
     } @else {
-      <div class="card empty">{{ 'empty.accounts' | t }}</div>
+      <p class="empty">{{ 'empty.accounts' | t }}</p>
     }
-  </section>
-}
-
-<!-- Account balance / actual balance (right now, not limited to the selected month) -->
-@if (summary(); as s) {
-  <section class="stats bal-stats">
-    <div class="stat card bal">
-      <span class="label"><span class="dot primary-bg"></span>{{ 'sum.accountBalance' | t }}</span>
-      <span class="value" [class.expense]="s.balance < 0">{{ s.balance | money }}</span>
-      <span class="muted hint">{{ 'sum.balanceHint' | t }}</span>
-    </div>
-    <div class="stat card bal actual">
-      <span class="label"><span class="dot primary-bg"></span>{{ 'sum.actual' | t }}</span>
-      <span class="value" [class.expense]="s.actual < 0">{{ s.actual | money }}</span>
-      <span class="muted hint">{{ 'sum.actualHintShort' | t }}</span>
-    </div>
-  </section>
-}
-
-<!-- Today's activity (always today, whatever month is selected) -->
-<div class="card today-card">
-  <div class="card-head">
-    <h2>{{ 'dash.today' | t }} <span class="muted small">· {{ todayDate | bdate }}</span></h2>
-    @if (today(); as td) {
-      <span class="today-tot small">
-        <span class="income">+{{ td.totalIncome | money }}</span>
-        <span class="expense">-{{ td.totalExpense | money }}</span>
-      </span>
-    }
-  </div>
-  <div class="list">
-    @for (tx of today()?.items ?? []; track tx.id) {
-      <app-tx-item [tx]="tx" />
-    } @empty {
-      <p class="empty">{{ today() ? ('dash.todayEmpty' | t) : ('common.loading' | t) }}</p>
-    }
-  </div>
-</div>
-
-@if (data(); as d) {
-  <!-- Month numbers + receivable / payable, all in one row -->
-  <section class="stats row-stats">
-    <div class="stat card">
-      <span class="label"><span class="dot income-bg"></span>{{ 'dash.income' | t }}</span>
-      <span class="value income">{{ d.income | money }}</span>
-    </div>
-    <div class="stat card">
-      <span class="label"><span class="dot expense-bg"></span>{{ 'dash.expense' | t }}</span>
-      <span class="value expense">{{ d.expense | money }}</span>
-    </div>
-    <div class="stat card">
-      <span class="label"><span class="dot primary-bg"></span>{{ 'dash.net' | t }}</span>
-      <span class="value" [class.expense]="d.net < 0">{{ d.net | money: true }}</span>
-      @if (savingsRate() !== null) {
-        <span class="muted hint">{{ savingsRate()! | num }}%</span>
-      }
-    </div>
+    <!-- Account balance / actual balance (right now, not limited to the selected period) -->
     @if (summary(); as s) {
-      <a class="stat card" routerLink="/dues">
-        <span class="label"><span class="dot income-bg"></span>{{ 'sum.receivable' | t }}</span>
-        <span class="value income">{{ s.receivable | money }}</span>
-      </a>
-      <a class="stat card" routerLink="/dues">
-        <span class="label"><span class="dot expense-bg"></span>{{ 'sum.payable' | t }}</span>
-        <span class="value expense">{{ s.payable | money }}</span>
-      </a>
+      <section class="stats bal-stats">
+        <div class="stat card bal">
+          <span class="label"><span class="dot primary-bg"></span>{{ 'sum.accountBalance' | t }}</span>
+          <span class="value" [class.expense]="s.balance < 0">{{ s.balance | money }}</span>
+          <span class="muted hint">{{ 'sum.balanceHint' | t }}</span>
+        </div>
+        <div class="stat card bal actual">
+          <span class="label"><span class="dot primary-bg"></span>{{ 'sum.actual' | t }}</span>
+          <span class="value" [class.expense]="s.actual < 0">{{ s.actual | money }}</span>
+          <span class="muted hint">{{ 'sum.actualHintShort' | t }}</span>
+        </div>
+      </section>
     }
   </section>
 
   <div class="dash-grid section">
     <div class="stack">
       <!-- Expense by category -->
-      <div class="card">
+      <div class="card inline-bars">
         <div class="card-head"><h2>{{ 'dash.byCategory' | t }}</h2></div>
         @for (c of d.expenseByCategory; track c.categoryId) {
           <div class="bar-row">
@@ -123,13 +138,14 @@
       <!-- 6 month trend -->
       <div class="card">
         <div class="card-head">
-          <h2>{{ 'dash.trend' | t }}</h2>
+          <h2>{{ (range().mode === 'year' ? 'dash.yearTrend' : 'dash.trend') | t }}</h2>
           <span class="legend">
             <span><span class="dot income-bg"></span>{{ 'type.Income' | t }}</span>
             <span><span class="dot expense-bg"></span>{{ 'type.Expense' | t }}</span>
           </span>
         </div>
-        <div class="trend" role="img" [attr.aria-label]="'dash.trend' | t">
+        <div class="trend" role="img" [attr.aria-label]="'dash.trend' | t"
+             [style.grid-template-columns]="'repeat(' + trendNewestFirst().length + ', minmax(0, 1fr))'">
           @for (m of trendNewestFirst(); track m.year * 100 + m.month) {
             <div class="trend-col" [title]="i18n.monthName(m.year, m.month) + ': +' + i18n.money(m.income) + ' / -' + i18n.money(m.expense)">
               <div class="trend-bars">
@@ -146,31 +162,16 @@
     </div>
 
     <div class="stack">
-      <!-- Recent -->
-      <div class="card">
-        <div class="card-head">
-          <h2>{{ 'dash.recent' | t }}</h2>
-          <a routerLink="/transactions">{{ 'dash.seeAll' | t }}</a>
-        </div>
-        <div class="list">
-          @for (tx of d.recent; track tx.id) {
-            <app-tx-item [tx]="tx" [showDate]="true" />
-          } @empty {
-            <p class="empty">{{ 'empty.transactions' | t }}</p>
-          }
-        </div>
-      </div>
-
       <!-- By member -->
       @if (d.expenseByMember.length) {
-        <div class="card">
+        <div class="card inline-bars">
           <div class="card-head"><h2>{{ 'dash.byMember' | t }}</h2></div>
           @for (m of d.expenseByMember; track m.memberId) {
             <div class="bar-row">
               <span class="avatar sm">{{ (m.name || '?').charAt(0).toUpperCase() }}</span>
               <div class="bar-body">
                 <div class="bar-top">
-                  <span>{{ m.name || ('dash.notAssigned' | t) }}</span>
+                  <span [title]="m.name">{{ m.name ? firstName(m.name) : ('dash.notAssigned' | t) }}</span>
                   <span class="bar-amt">{{ m.amount | money }}</span>
                 </div>
                 <div class="bar"><span class="primary-bg" [style.width.%]="pct(m.amount, maxMember())"></span></div>

@@ -596,6 +596,59 @@ button {
   font-weight: 600;
 }
 
+/* ============ Day / Month / Year picker ============ */
+.range-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  .month-picker .icon-btn {
+    width: 24px;
+    height: 26px;
+  }
+}
+.seg {
+  display: inline-flex;
+  padding: 1px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  button {
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 4px 7px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  button.on {
+    background: var(--primary);
+    color: var(--on-primary);
+  }
+}
+.range-label {
+  position: relative;
+  min-width: 84px;
+  padding: 0 2px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 12.5px;
+  white-space: nowrap;
+  cursor: pointer;
+  input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+  }
+}
+
 /* ============ Lists ============ */
 .list {
   display: flex;
@@ -643,9 +696,41 @@ button {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.tx-note {
+  font-weight: 700;
+  color: var(--text);
+}
 .tx-amount {
   font-weight: 700;
   white-space: nowrap;
+}
+/* Compact entry: everything on one line. */
+.tx-item.compact {
+  gap: 6px;
+  padding: 4px 2px;
+  .tx-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    font-size: 12px;
+  }
+  .tx-main {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .tx-title {
+    flex: none;
+    max-width: 55%;
+    font-size: 12.5px;
+  }
+  .tx-sub {
+    flex: 1;
+    min-width: 0;
+  }
+  .tx-amount {
+    font-size: 12.5px;
+  }
 }
 
 .list-row {

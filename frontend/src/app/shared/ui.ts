@@ -2,6 +2,7 @@ import { Component, HostListener, computed, inject, input, model, output } from 
 import { DomSanitizer } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 import { I18nService, MoneyPipe, TPipe } from '../core/i18n/i18n.service';
+import { toIso } from '../core/config';
 import { Period, Transaction } from '../core/models';
 
 // Static, hand-written SVG paths (24×24, stroke icons). Trusted constants, never user input.
@@ -28,6 +29,7 @@ const ICONS: Record<string, string> = {
   report: '<path d="M3 3v18h18"/><path d="M8 17v-5M13 17V8M18 17v-8"/>',
   file: '<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M9 14h6M9 17h4"/>',
   download: '<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>',
+  calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
 };
 
 @Component({
@@ -109,6 +111,94 @@ export class MonthPicker {
   }
 }
 
+export type RangeMode = 'day' | 'month' | 'year';
+/** A day, a month or a year, anchored on one date (yyyy-MM-dd). */
+export interface DateRange {
+  mode: RangeMode;
+  anchor: string;
+}
+
+/** First and last date (inclusive) covered by a range. */
+export function rangeBounds(r: DateRange): { from: string; to: string } {
+  const [y, m] = r.anchor.split('-').map(Number);
+  if (r.mode === 'day') return { from: r.anchor, to: r.anchor };
+  if (r.mode === 'year') return { from: `${y}-01-01`, to: `${y}-12-31` };
+  return { from: toIso(new Date(y, m - 1, 1)), to: toIso(new Date(y, m, 0)) };
+}
+
+/** Day / Month / Year switch plus ‹ label › stepping; tapping the label opens the native picker. */
+@Component({
+  selector: 'app-range-picker',
+  imports: [Icon, TPipe],
+  template: `
+    <div class="range-picker">
+      <div class="seg" role="group">
+        @for (m of modes; track m) {
+          <button type="button" [class.on]="range().mode === m" (click)="setMode(m)">{{ 'range.' + m | t }}</button>
+        }
+      </div>
+      <div class="month-picker">
+        <button type="button" class="icon-btn" (click)="shift(-1)" [attr.aria-label]="'action.prev' | t">
+          <app-icon name="chevron-left" />
+        </button>
+        <label class="range-label">
+          <span>{{ label() }}</span>
+          @if (range().mode === 'day') {
+            <input #pick type="date" [value]="range().anchor" (change)="pickDate(pick.value)" (click)="open(pick)" />
+          } @else if (range().mode === 'month') {
+            <input #pick type="month" [value]="range().anchor.slice(0, 7)" (change)="pickDate(pick.value + '-01')" (click)="open(pick)" />
+          }
+        </label>
+        <button type="button" class="icon-btn" (click)="shift(1)" [attr.aria-label]="'action.next' | t">
+          <app-icon name="chevron-right" />
+        </button>
+      </div>
+    </div>
+  `,
+})
+export class RangePicker {
+  private readonly i18n = inject(I18nService);
+  readonly range = model.required<DateRange>();
+  protected readonly modes: RangeMode[] = ['day', 'month', 'year'];
+
+  protected readonly label = computed(() => {
+    const { mode, anchor } = this.range();
+    const [y, m] = anchor.split('-').map(Number);
+    if (mode === 'day') return this.i18n.date(anchor);
+    if (mode === 'month') return this.i18n.monthName(y, m);
+    return new Intl.DateTimeFormat(this.i18n.locale(), { year: 'numeric' }).format(new Date(y, 0, 1));
+  });
+
+  protected setMode(mode: RangeMode): void {
+    this.range.update((r) => ({ ...r, mode }));
+  }
+
+  protected shift(delta: number): void {
+    const { mode, anchor } = this.range();
+    const [y, m, d] = anchor.split('-').map(Number);
+    const next =
+      mode === 'day' ? new Date(y, m - 1, d + delta) : mode === 'month' ? new Date(y, m - 1 + delta, 1) : new Date(y + delta, 0, 1);
+    this.range.set({ mode, anchor: toIso(next) });
+  }
+
+  protected pickDate(value: string): void {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) this.range.update((r) => ({ ...r, anchor: value }));
+  }
+
+  protected open(input: HTMLInputElement): void {
+    try {
+      input.showPicker();
+    } catch {
+      input.focus();
+    }
+  }
+}
+
+/** "Shahadat Hossain" → "Shahadat"; keeps lists short. */
+export function firstName(name: string): string {
+  return name.trim().split(/\s+/)[0] ?? '';
+}
+
 export function currentPeriod(): Period {
   const d = new Date();
   return { year: d.getFullYear(), month: d.getMonth() + 1 };
@@ -120,11 +210,15 @@ export function currentPeriod(): Period {
   imports: [RouterLink, MoneyPipe],
   template: `
     @let t = tx();
-    <a class="tx-item" [routerLink]="['/transactions', t.id]">
+    <a class="tx-item" [class.compact]="compact()" [routerLink]="['/transactions', t.id]">
       <span class="tx-icon" [style.background]="bg()">{{ icon() }}</span>
       <span class="tx-main">
         <span class="tx-title">{{ title() }}</span>
-        <span class="tx-sub">{{ sub() }}</span>
+        <span class="tx-sub">
+          @for (p of subParts(); track $index) {
+            @if (!$first) { · }<span [class.tx-note]="p.note">{{ p.text }}</span>
+          }
+        </span>
       </span>
       <span class="tx-amount" [class]="t.type.toLowerCase()">
         {{ t.type === 'Expense' ? '-' : t.type === 'Income' ? '+' : '' }}{{ t.amount | money }}
@@ -136,6 +230,8 @@ export class TxItem {
   private readonly i18n = inject(I18nService);
   readonly tx = input.required<Transaction>();
   readonly showDate = input(false);
+  /** One line per entry: title and details side by side, smaller icon. */
+  readonly compact = input(false);
 
   protected readonly icon = computed(() => (this.tx().type === 'Transfer' ? '🔁' : (this.tx().categoryIcon ?? '📦')));
   protected readonly bg = computed(() => {
@@ -147,13 +243,14 @@ export class TxItem {
     if (tx.type === 'Transfer') return this.i18n.t('type.Transfer');
     return this.i18n.catName(tx);
   });
-  protected readonly sub = computed(() => {
+  /** Date · account · note · member; the note is marked so it can stand out. */
+  protected readonly subParts = computed(() => {
     const tx = this.tx();
-    const parts: string[] = [];
-    if (this.showDate()) parts.push(this.i18n.date(tx.date));
-    parts.push(tx.type === 'Transfer' ? `${tx.accountName} → ${tx.toAccountName ?? ''}` : tx.accountName);
-    if (tx.note) parts.push(tx.note);
-    if (tx.memberName) parts.push(tx.memberName);
-    return parts.join(' · ');
+    const parts: { text: string; note?: boolean }[] = [];
+    if (this.showDate()) parts.push({ text: this.i18n.date(tx.date) });
+    parts.push({ text: tx.type === 'Transfer' ? `${tx.accountName} → ${tx.toAccountName ?? ''}` : tx.accountName });
+    if (tx.note) parts.push({ text: tx.note, note: true });
+    if (tx.memberName) parts.push({ text: firstName(tx.memberName) });
+    return parts;
   });
 }
