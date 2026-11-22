@@ -75,23 +75,39 @@ fieldset {
   font-size: 11px;
   font-weight: 700;
 }
-/* Phone: amount | category, account | member, note across. Laptop: all on one line. */
+/* Amount · category · account · member · note on one line, phone and laptop alike. */
 .batch-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
-  gap: 4px;
+  grid-template-columns: 58px minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 0.9fr) minmax(0, 1fr);
+  gap: 3px;
   input,
   select {
     width: 100%;
     min-width: 0;
-    min-height: 28px;
-    padding: 2px 6px;
+    min-height: 30px;
+    padding: 2px 4px;
     border-radius: var(--radius-sm);
     border: 1px solid var(--border);
     background: var(--surface);
     color: var(--text);
     font: inherit;
-    font-size: 12px;
+    font-size: 11px;
+  }
+  /* No native arrow: on a phone every pixel goes to the text; a tap still opens the list. */
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  input[type='number'] {
+    -moz-appearance: textfield;
+  }
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
   }
   input:focus,
   select:focus {
@@ -110,15 +126,15 @@ fieldset {
   .b-amount.transfer {
     color: var(--transfer);
   }
-  .b-note {
-    grid-column: 1 / -1;
-  }
 }
 @media (min-width: 900px) {
   .batch-grid {
     grid-template-columns: 90px minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.4fr);
-    .b-note {
-      grid-column: auto;
+    gap: 4px;
+    input,
+    select {
+      padding: 2px 6px;
+      font-size: 12px;
     }
   }
 }

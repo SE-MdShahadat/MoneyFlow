@@ -79,7 +79,7 @@
               <select [name]="'mem-' + r.key" [(ngModel)]="r.memberId" [attr.aria-label]="'field.member' | t">
                 <option [ngValue]="null">— {{ 'field.member' | t }} —</option>
                 @for (m of activeMembers(); track m.id) {
-                  <option [ngValue]="m.id">{{ m.name }}</option>
+                  <option [ngValue]="m.id">{{ firstName(m.name) }}</option>
                 }
               </select>
 

@@ -8,7 +8,7 @@ import { AuthService } from '../../core/auth.service';
 import { storageGet, storageSet, toIso, todayIso } from '../../core/config';
 import { I18N_PIPES, I18nService } from '../../core/i18n/i18n.service';
 import { Account, Category, Transaction, TransactionSave, TransactionType, User } from '../../core/models';
-import { Icon } from '../../shared/ui';
+import { Icon, firstName } from '../../shared/ui';
 
 const LAST_ACCOUNT_KEY = 'mf.lastAccount';
 /** Most entries one multi-day save may create. */
@@ -39,6 +39,7 @@ export class TransactionFormPage implements OnInit {
   private readonly router = inject(Router);
   private readonly location = inject(Location);
   protected readonly i18n = inject(I18nService);
+  protected readonly firstName = firstName;
 
   protected readonly types: TransactionType[] = ['Expense', 'Income', 'Transfer'];
 
