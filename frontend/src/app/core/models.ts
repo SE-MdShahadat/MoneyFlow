@@ -74,6 +74,10 @@ export interface Transaction {
   createdById: string;
   createdByName: string;
   createdAt: string;
+  projectId: number | null;
+  projectName: string | null;
+  quantity: number | null;
+  unit: string | null;
 }
 
 export interface TransactionSave {
@@ -85,6 +89,10 @@ export interface TransactionSave {
   categoryId: number | null;
   memberId: string | null;
   note: string | null;
+  /** undefined = projects are not available, so the project columns are not sent at all. */
+  projectId?: number | null;
+  quantity?: number | null;
+  unit?: string | null;
 }
 
 export interface TransactionQuery {
@@ -94,6 +102,7 @@ export interface TransactionQuery {
   accountId?: number;
   memberId?: string;
   search?: string;
+  projectId?: number;
   page?: number;
   pageSize?: number;
 }
@@ -173,4 +182,26 @@ export interface BalanceSummary {
 export interface Period {
   year: number;
   month: number;
+}
+
+/** A separate tally (e.g. house construction) that entries can be tagged with. Totals come from the database. */
+export interface Project {
+  id: number;
+  name: string;
+  budget: number | null;
+  note: string | null;
+  isDone: boolean;
+  createdById: string;
+  expense: number;
+  income: number;
+  entries: number;
+  firstDate: string | null;
+  lastDate: string | null;
+}
+
+export interface ProjectSave {
+  name: string;
+  budget: number | null;
+  note: string | null;
+  isDone: boolean;
 }

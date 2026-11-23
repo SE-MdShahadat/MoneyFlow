@@ -1,0 +1,68 @@
+<div class="page-head">
+  <h1>{{ 'nav.projects' | t }}</h1>
+  <button type="button" class="btn btn-primary btn-sm" (click)="editing.set('new')">
+    <app-icon name="plus" [size]="14" /> {{ 'proj.add' | t }}
+  </button>
+</div>
+
+@if (error()) {
+  <div class="alert alert-error" role="alert">{{ error() }}</div>
+}
+
+<div class="stack">
+  @for (p of running(); track p.id) {
+    <a class="card project-card" [routerLink]="['/projects', p.id]">
+      <div class="pc-head">
+        <span class="pc-name">🏗️ {{ p.name }}</span>
+        <strong class="expense">{{ p.expense | money }}</strong>
+      </div>
+      @if (p.budget) {
+        @let used = pct(p);
+        <div class="budget-bar" [class.over]="used > 100"><span [style.width.%]="used > 100 ? 100 : used"></span></div>
+        <div class="pc-meta muted small">
+          <span>{{ 'proj.ofBudget' | t: { pct: used, budget: i18n.money(p.budget) } }}</span>
+          @if (p.budget - p.expense >= 0) {
+            <span>{{ 'proj.left' | t: { amount: i18n.money(p.budget - p.expense) } }}</span>
+          } @else {
+            <span class="expense">{{ 'proj.over' | t: { amount: i18n.money(p.expense - p.budget) } }}</span>
+          }
+        </div>
+      } @else {
+        <div class="pc-meta muted small">
+          <span>{{ 'proj.entries' | t: { n: p.entries } }}</span>
+          <span>{{ 'proj.noBudget' | t }}</span>
+        </div>
+      }
+    </a>
+  } @empty {
+    @if (loaded() && !done().length && !error()) {
+      <div class="card empty">
+        <p>{{ 'proj.empty' | t }}</p>
+        <p class="muted small">{{ 'proj.hint' | t }}</p>
+        <button type="button" class="btn btn-primary" (click)="editing.set('new')">
+          <app-icon name="plus" [size]="14" /> {{ 'proj.add' | t }}
+        </button>
+      </div>
+    }
+  }
+
+  @if (done().length) {
+    <div class="card">
+      <div class="card-head"><h2>{{ 'proj.doneList' | t }}</h2></div>
+      <div class="list">
+        @for (p of done(); track p.id) {
+          <a class="list-row one-line" [routerLink]="['/projects', p.id]">
+            <span class="tx-icon" style="background: var(--surface-2)">🏗️</span>
+            <span class="grow">
+              <span class="title">{{ p.name }}</span>
+              <span class="muted small">{{ 'proj.entries' | t: { n: p.entries } }}</span>
+            </span>
+            <strong>{{ p.expense | money }}</strong>
+          </a>
+        }
+      </div>
+    </div>
+  }
+</div>
+
+<app-project-editor [target]="editing()" (closed)="editing.set(null)" (saved)="onSaved()" />

@@ -2,12 +2,12 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { Observable, forkJoin, of } from 'rxjs';
+import { Observable, catchError, forkJoin, of } from 'rxjs';
 import { ApiService } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { storageGet, storageSet, toIso, todayIso } from '../../core/config';
 import { I18N_PIPES, I18nService } from '../../core/i18n/i18n.service';
-import { Account, Category, Transaction, TransactionSave, TransactionType, User } from '../../core/models';
+import { Account, Category, Project, Transaction, TransactionSave, TransactionType, User } from '../../core/models';
 import { Icon, firstName } from '../../shared/ui';
 
 const LAST_ACCOUNT_KEY = 'mf.lastAccount';
@@ -24,7 +24,12 @@ interface BatchRow {
   categoryId: number | null;
   memberId: string | null;
   note: string;
+  quantity: number | null;
+  unit: string;
 }
+
+/** Suggestions for the unit box (any text is allowed). */
+export const UNIT_SUGGESTIONS = ['পিস', 'ব্যাগ', 'ঘনফুট', 'কেজি', 'টন', 'ফুট', 'ট্রাক', 'দিন', 'pcs', 'bag', 'cft', 'kg', 'ton'];
 
 @Component({
   selector: 'app-transaction-form',
@@ -52,6 +57,10 @@ export class TransactionFormPage implements OnInit {
   protected readonly allAccounts = signal<Account[]>([]);
   protected readonly allCategories = signal<Category[]>([]);
   protected readonly members = signal<User[]>([]);
+  protected readonly allProjects = signal<Project[]>([]);
+  /** False when projects could not be loaded; entries are then saved without project fields. */
+  private projectsReady = false;
+  protected readonly units = UNIT_SUGGESTIONS;
 
   // Form state
   protected readonly type = signal<TransactionType>('Expense');
@@ -63,11 +72,16 @@ export class TransactionFormPage implements OnInit {
     toAccountId: null as number | null,
     memberId: null as string | null,
     note: '',
+    projectId: null as number | null,
+    quantity: null as number | null,
+    unit: '',
   };
 
   /** New entries: 'batch' = one date with many rows (default); 'single' = the classic form with multi-day. */
   protected readonly mode = signal<'batch' | 'single'>('batch');
   protected batchDate = todayIso();
+  /** Project for every row of the batch (transfers excluded); null = none. */
+  protected batchProjectId: number | null = null;
   protected readonly rows = signal<BatchRow[]>([]);
   private nextRowKey = 1;
 
@@ -98,6 +112,11 @@ export class TransactionFormPage implements OnInit {
     const wanted = this.type() === 'Income' ? 'Income' : 'Expense';
     return this.allCategories().filter((c) => c.type === wanted && (c.isActive || c.id === e?.categoryId));
   });
+  /** Running projects, plus the one an existing entry already belongs to. */
+  protected readonly projects = computed(() => {
+    const e = this.existing();
+    return this.allProjects().filter((p) => !p.isDone || p.id === e?.projectId);
+  });
   protected readonly activeMembers = computed(() => {
     const e = this.existing();
     return this.members().filter((m) => m.isActive || m.id === e?.memberId);
@@ -119,14 +138,26 @@ export class TransactionFormPage implements OnInit {
       this.mode.set('single');
     }
 
+    const projectParam = Number(this.route.snapshot.queryParamMap.get('project')) || null;
+
     const tx$: Observable<Transaction | null> = id ? this.api.transaction(id) : of(null);
-    forkJoin([this.api.accounts(), this.api.categories(), this.api.users(), tx$]).subscribe({
-      next: ([accounts, categories, users, tx]) => {
+    // Projects are optional: if they cannot be read (e.g. 003_projects.sql not run yet), the form still works.
+    const projects$ = this.api.projects().pipe(catchError(() => of(null)));
+    forkJoin([this.api.accounts(), this.api.categories(), this.api.users(), projects$, tx$]).subscribe({
+      next: ([accounts, categories, users, projects, tx]) => {
         this.allAccounts.set(accounts);
         this.allCategories.set(categories);
         this.members.set(users);
+        this.projectsReady = projects !== null;
+        this.allProjects.set(projects ?? []);
         if (tx) this.fill(tx);
-        else this.setDefaults();
+        else {
+          this.setDefaults();
+          if (projectParam && projects?.some((p) => p.id === projectParam && !p.isDone)) {
+            this.form.projectId = projectParam;
+            this.batchProjectId = projectParam;
+          }
+        }
         this.ready.set(true);
       },
       error: (e) => {
@@ -147,6 +178,9 @@ export class TransactionFormPage implements OnInit {
       toAccountId: tx.toAccountId,
       memberId: tx.memberId,
       note: tx.note ?? '',
+      projectId: tx.projectId,
+      quantity: tx.quantity,
+      unit: tx.unit ?? '',
     };
   }
 
@@ -170,6 +204,8 @@ export class TransactionFormPage implements OnInit {
       categoryId: null,
       memberId: copyFrom ? copyFrom.memberId : this.form.memberId,
       note: '',
+      quantity: null,
+      unit: copyFrom?.unit ?? '',
     };
   }
 
@@ -231,6 +267,9 @@ export class TransactionFormPage implements OnInit {
       categoryId: r.type === 'Transfer' ? null : r.categoryId,
       memberId: r.memberId,
       note: r.note.trim() || null,
+      projectId: !this.projectsReady ? undefined : r.type === 'Transfer' ? null : this.batchProjectId,
+      quantity: r.quantity,
+      unit: r.unit.trim() || null,
     }));
 
     this.busy.set(true);
@@ -347,6 +386,9 @@ export class TransactionFormPage implements OnInit {
       categoryId: type === 'Transfer' ? null : this.categoryId(),
       memberId: f.memberId,
       note: f.note.trim() || null,
+      projectId: !this.projectsReady ? undefined : type === 'Transfer' ? null : f.projectId,
+      quantity: f.quantity,
+      unit: f.unit.trim() || null,
     };
 
     const id = this.id();

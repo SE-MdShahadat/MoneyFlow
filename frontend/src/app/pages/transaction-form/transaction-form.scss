@@ -38,8 +38,44 @@ fieldset {
 }
 
 /* ---------- Batch: one date, many entries ---------- */
+.batch-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 8px;
+  .field {
+    flex: 1 1 150px;
+  }
+}
 .batch-date {
   max-width: 220px;
+}
+/* Quantity × unit line under a row when the batch belongs to a project. */
+.batch-qty {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 3px;
+  input {
+    width: 78px;
+    min-width: 0;
+    min-height: 28px;
+    padding: 2px 5px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: 12px;
+  }
+  .small {
+    margin-left: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+.qty-rate {
+  margin: -6px 0 10px;
 }
 .batch-row {
   margin-bottom: 6px;

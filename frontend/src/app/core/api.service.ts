@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, from } from 'rxjs';
 import { supabase } from './config';
-import { toAccount, toCategory, toDue, toTransaction, toUser } from './mappers';
+import { toAccount, toCategory, toDue, toProject, toTransaction, toUser } from './mappers';
 import {
   Account,
   AccountSave,
@@ -12,6 +12,8 @@ import {
   CategorySave,
   CategoryType,
   Dashboard,
+  Project,
+  ProjectSave,
   Transaction,
   TransactionPage,
   TransactionQuery,
@@ -144,6 +146,8 @@ export class ApiService {
       p_account: q.accountId ?? null,
       p_member: q.memberId ?? null,
       p_search: q.search?.trim() || null,
+      // Sent only when used, so the app still works before 003_projects.sql is run.
+      ...(q.projectId ? { p_project: q.projectId } : {}),
     };
     return from(
       (async () => {
@@ -235,6 +239,46 @@ export class ApiService {
     );
   }
 
+  // ---------- Projects ----------
+  /** Projects with their totals: running ones first, newest first. */
+  projects(): Observable<Project[]> {
+    return from(
+      unwrap(
+        db().from('project_totals').select('*').order('is_done').order('created_at', { ascending: false }),
+      ).then((rows) => (rows as Record<string, unknown>[]).map(toProject)),
+    );
+  }
+
+  project(id: number): Observable<Project> {
+    return from(
+      (async () => {
+        const row = await unwrap(db().from('project_totals').select('*').eq('id', id).maybeSingle());
+        if (!row) throw new AppError('NOT_FOUND');
+        return toProject(row);
+      })(),
+    );
+  }
+
+  createProject(body: ProjectSave): Observable<void> {
+    return from(unwrap(db().from('projects').insert(projectRow(body))).then(() => undefined));
+  }
+
+  updateProject(id: number, body: ProjectSave): Observable<void> {
+    return from(changedOne(db().from('projects').update(projectRow(body)).eq('id', id).select('id')));
+  }
+
+  /** Only an empty project can be deleted; one with entries must be marked done instead. */
+  deleteProject(id: number): Observable<void> {
+    return from(
+      (async () => {
+        const { data, error } = await db().from('projects').delete().eq('id', id).select('id');
+        if ((error as { code?: string } | null)?.code === '23503') throw new AppError('PROJECT_IN_USE');
+        if (error) throw error;
+        if (!data?.length) throw new AppError('FORBIDDEN');
+      })(),
+    );
+  }
+
   // ---------- Reports ----------
   /**
    * Every entry between two dates (inclusive), oldest first, read in pages of 1000
@@ -248,6 +292,8 @@ export class ApiService {
       p_account: q.accountId ?? null,
       p_member: q.memberId ?? null,
       p_search: q.search?.trim() || null,
+      // Sent only when used, so the app still works before 003_projects.sql is run.
+      ...(q.projectId ? { p_project: q.projectId } : {}),
     };
     const chunk = 1000;
     return from(
@@ -345,8 +391,20 @@ function dueRow(b: DueSave) {
   };
 }
 
+function projectRow(b: ProjectSave) {
+  const budget = b.budget == null || (b.budget as unknown) === '' ? null : Number(b.budget);
+  return {
+    name: b.name.trim(),
+    budget: budget != null && budget >= 0 ? Math.round(budget * 100) / 100 : null,
+    note: b.note?.trim() || null,
+    is_done: b.isDone,
+  };
+}
+
 function transactionRow(b: TransactionSave) {
   const transfer = b.type === 'Transfer';
+  const qty = Number(b.quantity) || 0;
+  const project = transfer ? null : (b.projectId ?? null);
   return {
     type: b.type,
     amount: Math.round(b.amount * 100) / 100,
@@ -356,6 +414,14 @@ function transactionRow(b: TransactionSave) {
     category_id: transfer ? null : b.categoryId,
     member_id: b.memberId,
     note: b.note?.trim() || null,
+    // Left out when the form could not load projects (003_projects.sql not run yet).
+    ...(b.projectId === undefined
+      ? {}
+      : {
+          project_id: project,
+          quantity: project && qty > 0 ? Math.round(qty * 1000) / 1000 : null,
+          unit: project && qty > 0 ? b.unit?.trim() || null : null,
+        }),
   };
 }
 

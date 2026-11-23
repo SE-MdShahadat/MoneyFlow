@@ -33,6 +33,15 @@
   </select>
 </div>
 
+@if (projectId()) {
+  <div class="project-chip">
+    <a [routerLink]="['/projects', projectId()]">🏗️ {{ projectName() || '…' }}</a>
+    <button type="button" class="icon-btn" (click)="clearProject()" [attr.aria-label]="'proj.clearFilter' | t" [title]="'proj.clearFilter' | t">
+      <app-icon name="x" [size]="13" />
+    </button>
+  </div>
+}
+
 <div class="totals">
   <div class="card tot">
     <span class="muted small">{{ 'type.Income' | t }}</span>

@@ -32,6 +32,7 @@ const ICONS: Record<string, string> = {
   download: '<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>',
   sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
   moon: '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>',
+  project: '<path d="M3 21h18"/><path d="M5 21V10l7-6 7 6v11"/><path d="M9 21v-6h6v6"/>',
   calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
 };
 
@@ -251,6 +252,8 @@ export class TxItem {
   readonly showDate = input(false);
   /** One line per entry: title and details side by side, smaller icon. */
   readonly compact = input(false);
+  /** Leave the project name out (on the project's own page). */
+  readonly hideProject = input(false);
 
   protected readonly icon = computed(() => (this.tx().type === 'Transfer' ? '🔁' : (this.tx().categoryIcon ?? '📦')));
   protected readonly bg = computed(() => {
@@ -262,12 +265,14 @@ export class TxItem {
     if (tx.type === 'Transfer') return this.i18n.t('type.Transfer');
     return this.i18n.catName(tx);
   });
-  /** Date · account · note · member; the note is marked so it can stand out. */
+  /** Date · account · project · quantity · note · member; the note is marked so it can stand out. */
   protected readonly subParts = computed(() => {
     const tx = this.tx();
     const parts: { text: string; note?: boolean }[] = [];
     if (this.showDate()) parts.push({ text: this.i18n.date(tx.date) });
     parts.push({ text: tx.type === 'Transfer' ? `${tx.accountName} → ${tx.toAccountName ?? ''}` : tx.accountName });
+    if (tx.projectName && !this.hideProject()) parts.push({ text: `🏗️ ${tx.projectName}` });
+    if (tx.quantity) parts.push({ text: `${this.i18n.number(tx.quantity)} ${tx.unit ?? ''}`.trim() });
     if (tx.note) parts.push({ text: tx.note, note: true });
     if (tx.memberName) parts.push({ text: firstName(tx.memberName) });
     return parts;

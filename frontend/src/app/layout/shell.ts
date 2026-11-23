@@ -25,6 +25,7 @@ export class Shell {
     { path: '/transactions', label: 'nav.transactions', icon: 'list' },
     { path: '/accounts', label: 'nav.accounts', icon: 'wallet' },
     { path: '/dues', label: 'nav.dues', icon: 'swap' },
+    { path: '/projects', label: 'nav.projects', icon: 'project' },
     { path: '/reports', label: 'nav.reports', icon: 'report' },
     { path: '/categories', label: 'nav.categories', icon: 'tag' },
     { path: '/members', label: 'nav.members', icon: 'users' },

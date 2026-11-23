@@ -63,6 +63,25 @@
   width: 100%;
 }
 
+.project-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 6px;
+  padding: 1px 2px 1px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--primary);
+  font-size: 12px;
+  font-weight: 600;
+  a {
+    color: var(--primary);
+  }
+  .icon-btn {
+    width: 22px;
+    height: 22px;
+  }
+}
+
 /* All seven totals on one row. Phones swipe it sideways; wide screens fit all seven. */
 .totals {
   display: flex;

@@ -1,0 +1,133 @@
+<div class="page-head">
+  <a class="icon-btn" routerLink="/projects" [attr.aria-label]="'action.back' | t">
+    <app-icon name="chevron-left" />
+  </a>
+  <h1>🏗️ {{ project()?.name ?? '' }}</h1>
+  @if (project()?.isDone) {
+    <span class="badge done-badge">{{ 'proj.done' | t }}</span>
+  }
+  @if (project(); as p) {
+    <button type="button" class="icon-btn" (click)="editing.set(p)" [attr.aria-label]="'proj.edit' | t" [title]="'proj.edit' | t">
+      <app-icon name="edit" [size]="16" />
+    </button>
+  }
+</div>
+
+@if (error()) {
+  <div class="alert alert-error" role="alert">{{ error() }}</div>
+}
+
+@if (!loaded()) {
+  <p class="empty">{{ 'common.loading' | t }}</p>
+} @else if (project(); as p) {
+  <div class="stack">
+    <div class="proj-totals">
+      <div class="card">
+        <span class="muted small">{{ 'proj.spent' | t }}</span>
+        <strong class="expense">{{ p.expense | money }}</strong>
+      </div>
+      @if (p.budget) {
+        <div class="card">
+          <span class="muted small">{{ 'proj.budget' | t }}</span>
+          <strong>{{ p.budget | money }}</strong>
+        </div>
+        <div class="card">
+          <span class="muted small">{{ (p.budget - p.expense >= 0 ? 'proj.remaining' : 'proj.overBudget') | t }}</span>
+          <strong [class.income]="p.budget - p.expense >= 0" [class.expense]="p.budget - p.expense < 0">
+            {{ (p.budget - p.expense >= 0 ? p.budget - p.expense : p.expense - p.budget) | money }}
+          </strong>
+        </div>
+      }
+      @if (p.income) {
+        <div class="card">
+          <span class="muted small">{{ 'type.Income' | t }}</span>
+          <strong class="income">{{ p.income | money }}</strong>
+        </div>
+      }
+      <div class="card">
+        <span class="muted small">{{ 'proj.entryCount' | t }}</span>
+        <strong>{{ p.entries | num }}</strong>
+      </div>
+    </div>
+
+    @if (p.budget) {
+      @let used = pct(p);
+      <div>
+        <div class="budget-bar" [class.over]="used > 100"><span [style.width.%]="used > 100 ? 100 : used"></span></div>
+        <div class="pc-meta muted small">
+          <span>{{ 'proj.ofBudget' | t: { pct: used, budget: i18n.money(p.budget) } }}</span>
+          @if (p.firstDate) {
+            <span>{{ p.firstDate | bdate }} – {{ p.lastDate! | bdate }}</span>
+          }
+        </div>
+      </div>
+    }
+
+    <div class="proj-actions">
+      @if (!p.isDone) {
+        <a class="btn btn-primary btn-sm" routerLink="/transactions/new" [queryParams]="{ project: p.id }">
+          <app-icon name="plus" [size]="14" /> {{ 'proj.addEntry' | t }}
+        </a>
+      }
+      <button type="button" class="btn btn-ghost btn-sm" (click)="exportExcel()" [disabled]="!entries().length">
+        <app-icon name="download" [size]="14" /> Excel
+      </button>
+    </div>
+
+    <div class="proj-grid">
+      <div class="stack">
+        <div class="card">
+          <div class="card-head"><h2>{{ 'proj.byItem' | t }}</h2></div>
+          @for (it of items(); track it.key) {
+            <div class="item-row">
+              <span class="item-icon" [style.background]="it.color + '22'">{{ it.icon }}</span>
+              <div class="item-body">
+                <div class="item-top">
+                  <span>{{ it.name }}</span>
+                  <strong>{{ it.amount | money }}</strong>
+                </div>
+                @if (it.qty.length) {
+                  <div class="item-sub">
+                    <span>{{ qtyText(it.qty) }}</span>
+                    <span>{{ avgRate(it) }}</span>
+                  </div>
+                }
+                <div class="item-bar"><span [style.width.%]="(it.amount / maxItem()) * 100" [style.background]="it.color"></span></div>
+              </div>
+            </div>
+          } @empty {
+            <p class="empty">{{ 'proj.noEntries' | t }}</p>
+          }
+        </div>
+
+        @if (months().length > 1) {
+          <div class="card">
+            <div class="card-head"><h2>{{ 'proj.byMonth' | t }}</h2></div>
+            @for (m of months(); track m.key) {
+              <div class="month-row">
+                <span>{{ m.label }}</span>
+                <strong>{{ m.amount | money }}</strong>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="card list-card">
+        <div class="card-head"><h2>{{ 'proj.allEntries' | t }}</h2></div>
+        <div class="list">
+          @for (tx of newestFirst().slice(0, shown()); track tx.id) {
+            <app-tx-item [tx]="tx" [compact]="true" [showDate]="true" [hideProject]="true" />
+          } @empty {
+            <p class="empty">{{ 'proj.noEntries' | t }}</p>
+          }
+        </div>
+        @if (newestFirst().length > shown()) {
+          <button type="button" class="btn btn-ghost btn-block" (click)="showMore()">{{ 'action.loadMore' | t }}</button>
+        }
+      </div>
+    </div>
+  </div>
+}
+
+<app-project-editor [target]="editing()" (closed)="editing.set(null)" (saved)="onSaved($event)" />

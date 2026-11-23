@@ -5,6 +5,12 @@
   <h1>{{ (id() ? 'tx.edit' : 'tx.new') | t }}</h1>
 </div>
 
+<datalist id="unit-list">
+  @for (u of units; track u) {
+    <option [value]="u"></option>
+  }
+</datalist>
+
 <div class="form-wrap" [class.wide]="!id() && mode() === 'batch'">
   @if (!ready()) {
     <p class="empty">{{ 'common.loading' | t }}</p>
@@ -25,9 +31,22 @@
     <!-- One date first, then any number of entries for that date, saved together -->
     <form class="card batch" (ngSubmit)="saveBatch()">
       <fieldset [disabled]="busy()">
-        <div class="field batch-date">
-          <label for="batchDate">{{ 'field.date' | t }}</label>
-          <input id="batchDate" name="batchDate" type="date" [(ngModel)]="batchDate" required />
+        <div class="batch-top">
+          <div class="field batch-date">
+            <label for="batchDate">{{ 'field.date' | t }}</label>
+            <input id="batchDate" name="batchDate" type="date" [(ngModel)]="batchDate" required />
+          </div>
+          @if (projects().length) {
+            <div class="field batch-project">
+              <label for="batchProject">{{ 'field.project' | t }} <span class="muted">({{ 'field.optional' | t }})</span></label>
+              <select id="batchProject" name="batchProject" [(ngModel)]="batchProjectId">
+                <option [ngValue]="null">{{ 'field.none' | t }}</option>
+                @for (p of projects(); track p.id) {
+                  <option [ngValue]="p.id">🏗️ {{ p.name }}</option>
+                }
+              </select>
+            </div>
+          }
         </div>
 
         @for (r of rows(); track r.key; let i = $index) {
@@ -86,6 +105,17 @@
               <input class="b-note" type="text" maxlength="500" [placeholder]="'field.note' | t"
                      [attr.aria-label]="'field.note' | t" [name]="'note-' + r.key" [(ngModel)]="r.note" />
             </div>
+            @if (batchProjectId && r.type !== 'Transfer') {
+              <div class="batch-qty">
+                <input type="number" inputmode="decimal" min="0" step="any" [placeholder]="'field.quantity' | t"
+                       [attr.aria-label]="'field.quantity' | t" [name]="'qty-' + r.key" [(ngModel)]="r.quantity" />
+                <input type="text" maxlength="20" list="unit-list" [placeholder]="'field.unit' | t"
+                       [attr.aria-label]="'field.unit' | t" [name]="'unit-' + r.key" [(ngModel)]="r.unit" />
+                @if (r.quantity && r.amount) {
+                  <span class="muted small">{{ 'proj.rate' | t: { rate: i18n.money(r.amount / r.quantity), unit: r.unit || ('field.unit' | t) } }}</span>
+                }
+              </div>
+            }
           </div>
         }
 
@@ -189,6 +219,33 @@
             </select>
           </div>
         </div>
+
+        @if (type() !== 'Transfer' && projects().length) {
+          <div class="field">
+            <label for="project">{{ 'field.project' | t }} <span class="muted">({{ 'field.optional' | t }})</span></label>
+            <select id="project" name="projectId" [(ngModel)]="form.projectId">
+              <option [ngValue]="null">{{ 'field.none' | t }}</option>
+              @for (p of projects(); track p.id) {
+                <option [ngValue]="p.id">🏗️ {{ p.name }}</option>
+              }
+            </select>
+          </div>
+          @if (form.projectId) {
+            <div class="row">
+              <div class="field">
+                <label for="qty">{{ 'field.quantity' | t }} <span class="muted">({{ 'field.optional' | t }})</span></label>
+                <input id="qty" name="quantity" type="number" inputmode="decimal" min="0" step="any" [(ngModel)]="form.quantity" />
+              </div>
+              <div class="field">
+                <label for="unit">{{ 'field.unit' | t }}</label>
+                <input id="unit" name="unit" type="text" maxlength="20" list="unit-list" [(ngModel)]="form.unit" />
+              </div>
+            </div>
+            @if (form.quantity && form.amount) {
+              <p class="muted small qty-rate">{{ 'proj.rate' | t: { rate: i18n.money(form.amount / form.quantity), unit: form.unit || ('field.unit' | t) } }}</p>
+            }
+          }
+        }
 
         <!-- Same entry on many days (new entries only), e.g. daily office transport for 1–10 Nov -->
         @if (!id()) {

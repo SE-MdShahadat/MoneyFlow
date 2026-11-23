@@ -1,6 +1,6 @@
 import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { ApiService } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
@@ -20,6 +20,8 @@ const PAGE_SIZE = 50;
 export class TransactionsPage {
   private readonly api = inject(ApiService);
   private readonly auth = inject(AuthService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   protected readonly i18n = inject(I18nService);
 
   // Filters
@@ -28,6 +30,9 @@ export class TransactionsPage {
   protected readonly accountId = signal<number | null>(null);
   protected readonly memberId = signal<string | null>(null);
   protected readonly search = signal('');
+  /** Set from ?project=ID (the project page links here); shown as a removable chip. */
+  protected readonly projectId = signal<number | null>(Number(this.route.snapshot.queryParamMap.get('project')) || null);
+  protected readonly projectName = signal('');
   protected readonly types: (TransactionType | '')[] = ['', 'Expense', 'Income', 'Transfer'];
   protected readonly typeIcon: Record<TransactionType | '', string> = {
     '': 'list', Expense: 'out', Income: 'in', Transfer: 'swap',
@@ -77,6 +82,9 @@ export class TransactionsPage {
 
     this.loadSummary();
 
+    const pid = this.projectId();
+    if (pid) this.api.project(pid).subscribe({ next: (p) => this.projectName.set(p.name), error: () => this.clearProject() });
+
     // Reload from page 1 whenever any filter changes.
     effect(() => {
       const query = this.query();
@@ -94,6 +102,7 @@ export class TransactionsPage {
       accountId: this.accountId() ?? undefined,
       memberId: this.memberId() ?? undefined,
       search: this.search().trim() || undefined,
+      projectId: this.projectId() ?? undefined,
       pageSize: PAGE_SIZE,
     };
   });
@@ -157,6 +166,12 @@ export class TransactionsPage {
   protected canDeleteDay(items: Transaction[]): boolean {
     const me = this.auth.user()?.id;
     return this.auth.isAdmin() || items.some((t) => t.createdById === me);
+  }
+
+  protected clearProject(): void {
+    this.projectId.set(null);
+    this.projectName.set('');
+    this.router.navigate([], { relativeTo: this.route, queryParams: { project: null }, replaceUrl: true });
   }
 
   protected typeLabel(t: TransactionType | ''): string {

@@ -14,6 +14,8 @@ export const routes: Routes = [
       { path: 'transactions', loadComponent: () => import('./pages/transactions/transactions').then((m) => m.TransactionsPage) },
       { path: 'transactions/new', loadComponent: () => import('./pages/transaction-form/transaction-form').then((m) => m.TransactionFormPage) },
       { path: 'transactions/:id', loadComponent: () => import('./pages/transaction-form/transaction-form').then((m) => m.TransactionFormPage) },
+      { path: 'projects', loadComponent: () => import('./pages/projects/projects').then((m) => m.ProjectsPage) },
+      { path: 'projects/:id', loadComponent: () => import('./pages/projects/project-detail').then((m) => m.ProjectDetailPage) },
       { path: 'dues', loadComponent: () => import('./pages/dues/dues').then((m) => m.DuesPage) },
       { path: 'reports', loadComponent: () => import('./pages/reports/reports').then((m) => m.ReportsPage) },
       { path: 'accounts', loadComponent: () => import('./pages/accounts/accounts').then((m) => m.AccountsPage) },

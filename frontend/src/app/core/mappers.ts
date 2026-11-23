@@ -1,4 +1,4 @@
-import { Account, Category, Due, Transaction, User } from './models';
+import { Account, Category, Due, Project, Transaction, User } from './models';
 
 /* Database rows use snake_case; the app uses camelCase. These turn one into the other. */
 
@@ -74,5 +74,25 @@ export function toTransaction(d: Row): Transaction {
     createdById: d['created_by'],
     createdByName: d['created_by_name'] ?? '',
     createdAt: d['created_at'],
+    projectId: d['project_id'] ?? null,
+    projectName: d['project_name'] ?? null,
+    quantity: d['quantity'] == null ? null : Number(d['quantity']),
+    unit: d['unit'] ?? null,
+  };
+}
+
+export function toProject(p: Row): Project {
+  return {
+    id: p['id'],
+    name: p['name'],
+    budget: p['budget'] == null ? null : Number(p['budget']),
+    note: p['note'] ?? null,
+    isDone: !!p['is_done'],
+    createdById: p['created_by'],
+    expense: Number(p['expense'] ?? 0),
+    income: Number(p['income'] ?? 0),
+    entries: Number(p['entries'] ?? 0),
+    firstDate: p['first_date'] ?? null,
+    lastDate: p['last_date'] ?? null,
   };
 }

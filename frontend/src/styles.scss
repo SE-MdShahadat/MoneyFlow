@@ -151,6 +151,7 @@ button {
   padding: calc(6px + env(safe-area-inset-top)) 12px 6px;
   background: color-mix(in srgb, var(--bg) 88%, transparent);
   backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
 }
 
 .lang-pill {
@@ -216,7 +217,10 @@ button {
   padding-bottom: env(safe-area-inset-bottom);
 }
 .app-footer {
-  padding: 0 8px 3px;
+  margin-top: 3px;
+  padding: 4px 8px 5px;
+  /* Faint divider above the footer line. */
+  border-top: 1px solid var(--border);
   text-align: center;
   font-size: 9.5px;
   line-height: 13px;
