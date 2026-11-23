@@ -7,31 +7,30 @@
   <div class="seg type-seg" role="tablist">
     @for (t of types; track t) {
       <button type="button" role="tab" [class.on]="type() === t" [class]="t.toLowerCase()"
-              [attr.aria-selected]="type() === t" (click)="type.set(t)">
-        {{ typeLabel(t) }}
+              [attr.aria-selected]="type() === t" [attr.aria-label]="typeLabel(t)" [title]="typeLabel(t)"
+              (click)="type.set(t)">
+        <app-icon [name]="typeIcon[t]" [size]="15" />
       </button>
     }
   </div>
-  <div class="filter-row">
-    <label class="search">
-      <app-icon name="search" [size]="14" />
-      <input class="input" type="search" [placeholder]="'field.search' | t" [attr.aria-label]="'field.search' | t"
-             [ngModel]="search()" (ngModelChange)="search.set($event)" [ngModelOptions]="{ updateOn: 'blur' }"
-             (keydown.enter)="$any($event.target).blur()" />
-    </label>
-    <select class="input" [attr.aria-label]="'field.account' | t" [ngModel]="accountId()" (ngModelChange)="accountId.set($event)">
-      <option [ngValue]="null">{{ 'field.allAccounts' | t }}</option>
-      @for (a of accounts(); track a.id) {
-        <option [ngValue]="a.id">{{ a.name }}</option>
-      }
-    </select>
-    <select class="input" [attr.aria-label]="'field.member' | t" [ngModel]="memberId()" (ngModelChange)="memberId.set($event)">
-      <option [ngValue]="null">{{ 'field.allMembers' | t }}</option>
-      @for (m of members(); track m.id) {
-        <option [ngValue]="m.id">{{ m.name }}</option>
-      }
-    </select>
-  </div>
+  <label class="search">
+    <app-icon name="search" [size]="14" />
+    <input class="input" type="search" [placeholder]="'field.search' | t" [attr.aria-label]="'field.search' | t"
+           [ngModel]="search()" (ngModelChange)="search.set($event)" [ngModelOptions]="{ updateOn: 'blur' }"
+           (keydown.enter)="$any($event.target).blur()" />
+  </label>
+  <select class="input" [attr.aria-label]="'field.account' | t" [ngModel]="accountId()" (ngModelChange)="accountId.set($event)">
+    <option [ngValue]="null">{{ 'field.allAccounts' | t }}</option>
+    @for (a of accounts(); track a.id) {
+      <option [ngValue]="a.id">{{ a.name }}</option>
+    }
+  </select>
+  <select class="input" [attr.aria-label]="'field.member' | t" [ngModel]="memberId()" (ngModelChange)="memberId.set($event)">
+    <option [ngValue]="null">{{ 'field.allMembers' | t }}</option>
+    @for (m of members(); track m.id) {
+      <option [ngValue]="m.id">{{ m.name }}</option>
+    }
+  </select>
 </div>
 
 <div class="totals">
@@ -47,10 +46,7 @@
     <span class="muted small">{{ 'tx.count' | t: { n: total() } }}</span>
     <strong [class.expense]="totalIncome() - totalExpense() < 0">{{ totalIncome() - totalExpense() | money: true }}</strong>
   </div>
-</div>
-
-@if (summary(); as s) {
-  <div class="totals totals-4">
+  @if (summary(); as s) {
     <div class="card tot">
       <span class="muted small" [title]="'sum.balanceHint' | t">{{ 'sum.balance' | t }}</span>
       <strong [class.expense]="s.balance < 0">{{ s.balance | money }}</strong>
@@ -68,8 +64,8 @@
       <strong [class.expense]="s.actual < 0">{{ s.actual | money }}</strong>
       <span class="hint-line">{{ 'sum.actualHint' | t }}</span>
     </div>
-  </div>
-}
+  }
+</div>
 
 @if (error()) {
   <div class="alert alert-error" role="alert">{{ error() }}</div>
@@ -91,7 +87,7 @@
     </div>
     <div class="list">
       @for (tx of day.items; track tx.id) {
-        <app-tx-item [tx]="tx" />
+        <app-tx-item [tx]="tx" [compact]="true" />
       }
     </div>
   } @empty {

@@ -29,6 +29,9 @@ export class TransactionsPage {
   protected readonly memberId = signal<string | null>(null);
   protected readonly search = signal('');
   protected readonly types: (TransactionType | '')[] = ['', 'Expense', 'Income', 'Transfer'];
+  protected readonly typeIcon: Record<TransactionType | '', string> = {
+    '': 'list', Expense: 'out', Income: 'in', Transfer: 'swap',
+  };
 
   // Data
   protected readonly accounts = signal<Account[]>([]);

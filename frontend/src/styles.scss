@@ -813,6 +813,42 @@ button {
 .list-row .title {
   font-weight: 600;
 }
+/* One-line row: smaller icon, title and details side by side (like .tx-item.compact). */
+.list-row.one-line {
+  gap: 6px;
+  padding: 4px 2px;
+  .tx-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    font-size: 12px;
+  }
+  .grow {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .title {
+    flex: none;
+    max-width: 55%;
+    font-size: 12.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .grow > .muted {
+    flex: 1;
+    min-width: 0;
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  > strong {
+    font-size: 12.5px;
+    white-space: nowrap;
+  }
+}
 .list-row.inactive {
   opacity: 0.55;
 }

@@ -20,7 +20,7 @@
   <div class="card">
     <div class="list">
       @for (a of accounts(); track a.id) {
-        <button type="button" class="list-row as-button" [class.inactive]="!a.isActive" (click)="open(a)" [disabled]="!auth.isAdmin()">
+        <button type="button" class="list-row as-button one-line" [class.inactive]="!a.isActive" (click)="open(a)" [disabled]="!auth.isAdmin()">
           <span class="tx-icon" style="background: var(--surface-2)">{{ icons[a.type] }}</span>
           <span class="grow">
             <span class="title">{{ a.name }}</span>
