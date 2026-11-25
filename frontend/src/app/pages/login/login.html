@@ -9,6 +9,7 @@
 
   <div class="login-panel">
     <div class="login-top top-prefs">
+      <a class="back-home" routerLink="/welcome">← {{ 'app.name' | t }}</a>
       <app-theme-toggle />
       <button type="button" class="lang-pill" (click)="i18n.toggle()" [title]="otherLang()" [attr.aria-label]="otherLang()">
         {{ otherLangShort() }}
@@ -16,11 +17,11 @@
     </div>
 
     <div class="login-card">
-      <div class="mobile-brand">
+      <a class="mobile-brand" routerLink="/welcome">
         <img class="brand-mark big" src="brand/logo-mark.png" alt="" />
         <h1>{{ 'app.name' | t }}</h1>
         <p class="muted">{{ 'app.tagline' | t }}</p>
-      </div>
+      </a>
 
       <div class="seg tabs" role="tablist">
         <button type="button" role="tab" [class.on]="mode() === 'login'" [attr.aria-selected]="mode() === 'login'"

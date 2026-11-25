@@ -3,6 +3,7 @@ import { authGuard, guestGuard } from './core/auth.service';
 import { Shell } from './layout/shell';
 
 export const routes: Routes = [
+  { path: 'welcome', canActivate: [guestGuard], loadComponent: () => import('./pages/welcome/welcome').then((m) => m.WelcomePage) },
   { path: 'login', canActivate: [guestGuard], loadComponent: () => import('./pages/login/login').then((m) => m.LoginPage) },
   {
     path: '',

@@ -1,6 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 import { I18nService, TPipe } from '../../core/i18n/i18n.service';
 import { User } from '../../core/models';
@@ -8,7 +8,7 @@ import { ThemeToggle } from '../../shared/ui';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule, TPipe, ThemeToggle],
+  imports: [FormsModule, RouterLink, TPipe, ThemeToggle],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
@@ -17,7 +17,9 @@ export class LoginPage {
   private readonly router = inject(Router);
   protected readonly i18n = inject(I18nService);
 
-  protected readonly mode = signal<'login' | 'signup'>('login');
+  protected readonly mode = signal<'login' | 'signup'>(
+    inject(ActivatedRoute).snapshot.queryParamMap.get('signup') ? 'signup' : 'login',
+  );
   protected readonly busy = signal(false);
   protected readonly error = signal('');
   protected readonly pending = signal(false);

@@ -1,0 +1,65 @@
+<header class="w-top">
+  <a class="w-brand" routerLink="/welcome">
+    <img class="brand-mark" src="brand/logo-mark.png" alt="" />
+    <span>{{ 'app.name' | t }}</span>
+  </a>
+  <span class="spacer"></span>
+  <div class="top-prefs">
+    <app-theme-toggle />
+    <button type="button" class="lang-pill" (click)="i18n.toggle()" [title]="otherLang()" [attr.aria-label]="otherLang()">
+      {{ otherLangShort() }}
+    </button>
+  </div>
+  <a class="btn btn-ghost btn-sm" routerLink="/login">{{ 'login.title' | t }}</a>
+</header>
+
+<section class="w-hero">
+  <img class="hero-mark" src="brand/logo-mark.png" alt="" />
+  <h1>{{ 'wel.heroTitle' | t }}</h1>
+  <p>{{ 'wel.heroText' | t }}</p>
+  <div class="cta">
+    <a class="btn btn-primary" routerLink="/login" [queryParams]="{ signup: 1 }">{{ 'wel.start' | t }}</a>
+    <button type="button" class="btn btn-ghost" (click)="scrollTo('features')">{{ 'wel.seeFeatures' | t }}</button>
+  </div>
+  <p class="small">{{ 'wel.free' | t }}</p>
+</section>
+
+<section id="features" class="w-features">
+  <div class="sec-head">
+    <h2>{{ 'wel.featuresTitle' | t }}</h2>
+    <p>{{ 'wel.featuresText' | t }}</p>
+  </div>
+  <div class="feature-grid">
+    @for (f of features; track f.title) {
+      <article class="feature">
+        <span class="ic" aria-hidden="true"><app-icon [name]="f.icon" [size]="22" /></span>
+        <h3>{{ f.title | t }}</h3>
+        <p>{{ f.text | t }}</p>
+      </article>
+    }
+  </div>
+</section>
+
+<section class="w-steps">
+  <div class="sec-head">
+    <h2>{{ 'wel.stepsTitle' | t }}</h2>
+  </div>
+  <ol class="steps">
+    @for (s of steps; track s; let i = $index) {
+      <li>
+        <span class="num">{{ i + 1 }}</span>
+        <span>{{ s | t }}</span>
+      </li>
+    }
+  </ol>
+  <div class="cta">
+    <a class="btn btn-primary" routerLink="/login" [queryParams]="{ signup: 1 }">{{ 'wel.start' | t }}</a>
+    <a class="btn btn-ghost" routerLink="/login">{{ 'wel.haveAccount' | t }}</a>
+  </div>
+</section>
+
+<footer class="w-foot">
+  <img class="company" src="brand/peoplesync-logo.png" alt="PeopleSync Technologies Ltd." />
+  <span>{{ 'wel.productOf' | t }}</span>
+  <span class="credit">© {{ app.year }} {{ app.name }} · {{ 'app.developedBy' | t }} {{ app.developer }} · v{{ app.version }}</span>
+</footer>

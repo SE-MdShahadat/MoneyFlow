@@ -101,11 +101,13 @@ export class AuthService {
   }
 }
 
-export const authGuard: CanActivateFn = async () => {
+export const authGuard: CanActivateFn = async (_route, state) => {
   const auth = inject(AuthService);
   const router = inject(Router);
   await auth.ready;
-  return auth.isLoggedIn() ? true : router.createUrlTree(['/login']);
+  if (auth.isLoggedIn()) return true;
+  // The bare address (or the default page) shows the welcome page; deep links go straight to sign-in.
+  return ['/', '', '/dashboard'].includes(state.url) ? router.createUrlTree(['/welcome']) : router.createUrlTree(['/login']);
 };
 
 export const guestGuard: CanActivateFn = async () => {
