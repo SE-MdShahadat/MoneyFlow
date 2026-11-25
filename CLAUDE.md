@@ -10,6 +10,7 @@ MoneyFlow is a family finance tracker (income, expense, transfers between accoun
 
 - `frontend/`: Angular 20 (standalone components, signals, **zoneless**, hash routing), plain SCSS, no UI library. Deployed to GitHub Pages by `.github/workflows/deploy-pages.yml` on push to `main` (https://se-mdshahadat.github.io/MoneyFlow/).
 - `supabase/schema.sql` + numbered follow-ups (`002_dues.sql`, …, run in order on a new project): the whole backend. Tables, Row Level Security policies, triggers, views and RPC functions on Supabase (PostgreSQL). There is no custom server; the browser talks to Supabase directly with `@supabase/supabase-js`.
+- `Scripts/MoneyFlow_SqlServer.sql`: the same whole database as one SQL Server / Azure SQL script (RLS via `SESSION_CONTEXT` set by `dbo.begin_request`), kept ready for a move to Azure. **Every database change must be made there too, in the same commit**, and checked with `Scripts/tests/MoneyFlow_SqlServer_Test.sql` on a throwaway LocalDB database (`(localdb)MSSQLLocalDB`, not the existing empty `MoneyFlow` database). See `Scripts/README.md`.
 - `frontend/public/config.js`: Supabase URL + publishable key, read at runtime (no rebuild to switch projects). The publishable key is public by design; security comes from RLS.
 
 ## Commands
