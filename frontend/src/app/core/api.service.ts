@@ -12,6 +12,7 @@ import {
   CategorySave,
   CategoryType,
   Dashboard,
+  Family,
   Project,
   ProjectSave,
   Transaction,
@@ -77,6 +78,26 @@ export class ApiService {
         return toUser(rows[0]);
       })(),
     );
+  }
+
+  // ---------- Family ----------
+  family(): Observable<Family> {
+    return from(
+      (async () => {
+        const rows = (await unwrap(db().from('families').select('id, name, invite_code').limit(1))) as Record<string, unknown>[];
+        if (!rows?.length) throw new AppError('NOT_FOUND');
+        return { id: rows[0]['id'] as number, name: rows[0]['name'] as string, inviteCode: rows[0]['invite_code'] as string };
+      })(),
+    );
+  }
+
+  renameFamily(id: number, name: string): Observable<void> {
+    return from(changedOne(db().from('families').update({ name: name.trim() }).eq('id', id).select('id')));
+  }
+
+  /** Admin only: a new invite code; the old one stops working. */
+  regenerateInviteCode(): Observable<string> {
+    return from(unwrap(db().rpc('regenerate_invite_code')).then((code) => code as string));
   }
 
   // ---------- Accounts ----------

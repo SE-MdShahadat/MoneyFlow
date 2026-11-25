@@ -205,3 +205,13 @@ export interface ProjectSave {
   note: string | null;
   isDone: boolean;
 }
+
+/** The family the signed-in person belongs to. Every row in the database belongs to one family. */
+export interface Family {
+  id: number;
+  name: string;
+  inviteCode: string;
+}
+
+/** Sign-up either starts a new family or joins one with its invite code. */
+export type SignUpFamily = { familyName: string } | { inviteCode: string };

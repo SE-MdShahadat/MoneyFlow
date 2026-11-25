@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-MoneyFlow is a family finance tracker (income, expense, transfers between accounts, dues, projects and reports; bills, loans and budgets are planned). One family per Supabase project. The UI is bilingual (Bangla default, English toggle) and responsive: bottom tab bar + FAB on phones, sidebar on screens ≥900px. It must stay usable from any network on Android and laptop with free hosting only.
+MoneyFlow is a family finance tracker (income, expense, transfers between accounts, dues, projects and reports; bills, loans and budgets are planned). Many families share one Supabase project; each sees only its own data. The UI is bilingual (Bangla default, English toggle) and responsive: bottom tab bar + FAB on phones, sidebar on screens ≥900px. It must stay usable from any network on Android and laptop with free hosting only.
 
 ## Architecture
 
@@ -24,7 +24,8 @@ No automated tests exist yet. Schema changes: edit `supabase/schema.sql` and app
 
 ## Data and security model
 
-- Sign-up is open; a trigger on `auth.users` creates a `profiles` row. The first profile becomes the active Admin; later ones are inactive until an admin approves them (`is_active`). `is_member()` / `is_admin()` gate every policy.
+- Families (`004_families.sql`): every table has `family_id`, set by BEFORE triggers (`a_family_set`, never by the app), and every policy also requires `family_id = my_family()`. Entries may only reference accounts/categories/projects/members of the same family (`INVALID_REFERENCE`). `supabase/tests/families_isolation_test.sql` checks the isolation and always rolls back.
+- Sign-up is open; a trigger on `auth.users` creates a `profiles` row. With `family_name` in the sign-up metadata it creates a new family (person = active Admin, default categories seeded); with `invite_code` it joins that family as an inactive Member until that family's admin approves them (`is_active`). The app checks the code first with `check_invite()` (callable before sign-in). `is_member()` / `is_admin()` / `my_family()` gate every policy.
 - Admin manages accounts, categories, members; Members read everything, add entries, edit/delete only their own (`created_by`, set by trigger). A trigger refuses to remove the last active admin.
 - RLS-blocked updates/deletes affect 0 rows without an error, so `ApiService` asks for the changed ids back (`changedOne`) and turns 0 into `FORBIDDEN`.
 - Account balances are computed in the `account_balances` view, never stored. Transfers have no category. Deleting an account/category that has entries only deactivates it (FK error 23503 → set `is_active = false`).

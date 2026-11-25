@@ -30,7 +30,11 @@
       </div>
 
       @if (mode() === 'signup') {
-        <p class="muted small">{{ 'login.signupHint' | t }}</p>
+        <div class="seg kind-seg">
+          <button type="button" [class.on]="signupKind() === 'new'" (click)="signupKind.set('new')">{{ 'login.newFamily' | t }}</button>
+          <button type="button" [class.on]="signupKind() === 'join'" (click)="signupKind.set('join')">{{ 'login.joinFamily' | t }}</button>
+        </div>
+        <p class="muted small">{{ (signupKind() === 'join' ? 'login.joinHint' : 'login.newHint') | t }}</p>
       }
 
       @if (pending()) {
@@ -46,6 +50,19 @@
             <label for="name">{{ 'field.name' | t }}</label>
             <input id="name" name="name" [(ngModel)]="form.name" required maxlength="100" autocomplete="name" />
           </div>
+          @if (signupKind() === 'new') {
+            <div class="field">
+              <label for="familyName">{{ 'fam.name' | t }}</label>
+              <input id="familyName" name="familyName" [(ngModel)]="form.familyName" required maxlength="100"
+                     [placeholder]="'fam.namePh' | t" />
+            </div>
+          } @else {
+            <div class="field">
+              <label for="inviteCode">{{ 'fam.code' | t }}</label>
+              <input id="inviteCode" name="inviteCode" class="code-input" [(ngModel)]="form.inviteCode" required maxlength="20"
+                     autocomplete="off" autocapitalize="characters" spellcheck="false" />
+            </div>
+          }
         }
         <div class="field">
           <label for="email">{{ 'login.email' | t }}</label>

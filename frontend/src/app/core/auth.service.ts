@@ -3,7 +3,7 @@ import { CanActivateFn, Router } from '@angular/router';
 import { AppError } from './api.service';
 import { supabase } from './config';
 import { toUser } from './mappers';
-import { User } from './models';
+import { SignUpFamily, User } from './models';
 
 /** Who is signed in. Sign-in itself is handled by Supabase Auth (email + password). */
 @Injectable({ providedIn: 'root' })
@@ -50,12 +50,26 @@ export class AuthService {
     return this.loadProfile(data.user.id);
   }
 
-  /** Creates a login. The first one in a new database becomes the admin; later ones wait for approval. */
-  async signUp(name: string, email: string, password: string): Promise<User | null> {
+  /**
+   * Creates a login. Starting a new family makes this person its active admin;
+   * joining with an invite code leaves them waiting for that family's admin to approve them.
+   */
+  async signUp(name: string, email: string, password: string, family: SignUpFamily): Promise<User | null> {
+    const meta: Record<string, string> = { name: name.trim() };
+    if ('inviteCode' in family) {
+      const code = family.inviteCode.trim().toUpperCase();
+      // Checked first: a bad code inside the sign-up trigger only gives a generic database error.
+      const { data: familyName, error: checkError } = await supabase().rpc('check_invite', { p_code: code });
+      if (checkError) throw checkError;
+      if (!familyName) throw new AppError('INVALID_INVITE');
+      meta['invite_code'] = code;
+    } else {
+      meta['family_name'] = family.familyName.trim();
+    }
     const { data, error } = await supabase().auth.signUp({
       email: email.trim(),
       password,
-      options: { data: { name: name.trim() } },
+      options: { data: meta },
     });
     if (error) throw error;
     if (!data.session || !data.user) throw new AppError('CONFIRM_EMAIL');

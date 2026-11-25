@@ -825,6 +825,20 @@ button {
 .list-row .title {
   font-weight: 600;
 }
+/* Family page: invite code row. */
+.invite-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+}
+.invite-code {
+  font-size: 16px;
+  letter-spacing: 0.12em;
+  font-family: ui-monospace, monospace;
+  margin-right: auto;
+  user-select: all;
+}
 /* One-line row: smaller icon, title and details side by side (like .tx-item.compact). */
 .list-row.one-line {
   gap: 6px;

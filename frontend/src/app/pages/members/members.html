@@ -10,6 +10,27 @@
 }
 
 <div class="stack">
+  @if (family(); as fam) {
+    <div class="card family-card">
+      <div class="card-head">
+        <h2>🏠 {{ fam.name }}</h2>
+        @if (auth.isAdmin()) {
+          <button type="button" class="icon-btn" (click)="openRename()" [attr.aria-label]="'fam.rename' | t" [title]="'fam.rename' | t">
+            <app-icon name="edit" [size]="15" />
+          </button>
+        }
+      </div>
+      <div class="invite-row">
+        <span class="muted small">{{ 'fam.code' | t }}</span>
+        <strong class="invite-code">{{ fam.inviteCode }}</strong>
+        <button type="button" class="btn btn-primary btn-sm" (click)="share()">{{ (copied() ? 'fam.copied' : 'fam.share') | t }}</button>
+        @if (auth.isAdmin()) {
+          <button type="button" class="btn btn-ghost btn-sm" (click)="newCode()" [disabled]="busy()">{{ 'fam.newCode' | t }}</button>
+        }
+      </div>
+    </div>
+  }
+
   <div class="card">
     <div class="list">
       @for (m of members(); track m.id) {
@@ -40,6 +61,22 @@
 
   <p class="muted small">{{ (auth.isAdmin() ? 'mem.howToAdd' : 'common.adminOnly') | t }}</p>
 </div>
+
+<app-modal [open]="renaming()" [title]="'fam.rename' | t" (closed)="renaming.set(false)">
+  <form (ngSubmit)="saveName()">
+    <div class="field">
+      <label for="fam-name">{{ 'fam.name' | t }}</label>
+      <input id="fam-name" name="familyName" [(ngModel)]="familyName" required maxlength="100" />
+    </div>
+    @if (formError()) {
+      <div class="alert alert-error" role="alert">{{ formError() }}</div>
+    }
+    <div class="actions">
+      <button type="button" class="btn btn-ghost" (click)="renaming.set(false)">{{ 'action.cancel' | t }}</button>
+      <button type="submit" class="btn btn-primary" [disabled]="busy()">{{ 'action.save' | t }}</button>
+    </div>
+  </form>
+</app-modal>
 
 <app-modal [open]="editing() !== null" [title]="'mem.edit' | t" (closed)="editing.set(null)">
   <form (ngSubmit)="save()">

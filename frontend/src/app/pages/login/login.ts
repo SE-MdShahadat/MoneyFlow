@@ -25,7 +25,9 @@ export class LoginPage {
   /** Short label for the round language button (same size as the theme button). */
   protected readonly otherLangShort = computed(() => (this.i18n.lang() === 'bn' ? 'EN' : 'বাং'));
 
-  protected form = { name: '', email: '', password: '' };
+  /** Sign-up: start a new family, or join an existing one with its invite code. */
+  protected readonly signupKind = signal<'new' | 'join'>('new');
+  protected form = { name: '', familyName: '', inviteCode: '', email: '', password: '' };
 
   protected setMode(m: 'login' | 'signup'): void {
     this.mode.set(m);
@@ -41,7 +43,12 @@ export class LoginPage {
     try {
       const user: User | null =
         this.mode() === 'signup'
-          ? await this.auth.signUp(this.form.name, this.form.email, this.form.password)
+          ? await this.auth.signUp(
+              this.form.name,
+              this.form.email,
+              this.form.password,
+              this.signupKind() === 'join' ? { inviteCode: this.form.inviteCode } : { familyName: this.form.familyName },
+            )
           : await this.auth.signIn(this.form.email, this.form.password);
 
       if (user?.isActive) {
