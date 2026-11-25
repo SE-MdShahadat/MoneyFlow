@@ -32,8 +32,8 @@ export class DashboardPage {
   protected readonly accountIcons = ACCOUNT_ICONS;
   protected readonly firstName = firstName;
 
-  /** Day, month (default) or year the numbers below are for. */
-  protected readonly range = signal<DateRange>({ mode: 'month', anchor: todayIso() });
+  /** Day (default: today), month or year the numbers below are for. */
+  protected readonly range = signal<DateRange>({ mode: 'day', anchor: todayIso() });
   /** Month summary from the server (accounts, recent, 6-month trend, and the month's numbers). */
   private readonly base = signal<Dashboard | null>(null);
   /** Day / year numbers worked out in the browser; null in month view. */
