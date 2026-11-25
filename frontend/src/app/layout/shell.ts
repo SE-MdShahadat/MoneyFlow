@@ -34,6 +34,8 @@ export class Shell {
 
   /** Label for the language button: shows the language you would switch to. */
   protected readonly otherLang = computed(() => (this.i18n.lang() === 'bn' ? 'English' : 'বাংলা'));
+  /** Short label for the round language button (same size as the theme button). */
+  protected readonly otherLangShort = computed(() => (this.i18n.lang() === 'bn' ? 'EN' : 'বাং'));
   /** © 2026 MoneyFlow · Developed by PeopleSync Technologies Ltd. · v1.0.0 (same line as FuelSync). */
   protected readonly footer = computed(
     () => `© ${APP_INFO.year} ${APP_INFO.name} · ${this.i18n.t('app.developedBy')} ${APP_INFO.developer} · v${APP_INFO.version}`,

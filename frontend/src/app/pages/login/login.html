@@ -10,8 +10,8 @@
   <div class="login-panel">
     <div class="login-top top-prefs">
       <app-theme-toggle />
-      <button type="button" class="lang-pill" (click)="i18n.toggle()">
-        <app-icon name="globe" [size]="13" /> {{ otherLang() }}
+      <button type="button" class="lang-pill" (click)="i18n.toggle()" [title]="otherLang()" [attr.aria-label]="otherLang()">
+        {{ otherLangShort() }}
       </button>
     </div>
 

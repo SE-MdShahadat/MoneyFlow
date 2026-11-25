@@ -4,11 +4,11 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 import { I18nService, TPipe } from '../../core/i18n/i18n.service';
 import { User } from '../../core/models';
-import { Icon, ThemeToggle } from '../../shared/ui';
+import { ThemeToggle } from '../../shared/ui';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule, TPipe, Icon, ThemeToggle],
+  imports: [FormsModule, TPipe, ThemeToggle],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
@@ -22,6 +22,8 @@ export class LoginPage {
   protected readonly error = signal('');
   protected readonly pending = signal(false);
   protected readonly otherLang = computed(() => (this.i18n.lang() === 'bn' ? 'English' : 'বাংলা'));
+  /** Short label for the round language button (same size as the theme button). */
+  protected readonly otherLangShort = computed(() => (this.i18n.lang() === 'bn' ? 'EN' : 'বাং'));
 
   protected form = { name: '', email: '', password: '' };
 
